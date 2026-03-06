@@ -567,41 +567,42 @@ const BirthChartPage: React.FC = () => {
         .attr("stroke-width", 1)
         .attr("opacity", 0.8);
       
-      // Add sign symbol with professional styling
+      // Add sign symbol with professional styling and better positioning
       const textAngle = sign.angle * Math.PI / 180;
-      const textX = centerX + (radius + 35) * Math.cos(textAngle);
-      const textY = centerY + (radius + 35) * Math.sin(textAngle);
+      const textRadius = radius + 25; // Reduced from 35 to prevent edge cropping
+      const textX = centerX + textRadius * Math.cos(textAngle);
+      const textY = centerY + textRadius * Math.sin(textAngle);
       
-      // Symbol background circle
+      // Symbol background circle - slightly smaller
       svg.append("circle")
         .attr("cx", textX)
         .attr("cy", textY)
-        .attr("r", 18)
+        .attr("r", 15) // Reduced from 18
         .attr("fill", sign.color + "20")
         .attr("stroke", sign.color)
         .attr("stroke-width", 1)
         .attr("opacity", 0.8);
       
-      // Symbol text
+      // Symbol text - slightly smaller
       svg.append("text")
         .attr("x", textX)
         .attr("y", textY + 1)
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
         .attr("fill", sign.color)
-        .attr("font-size", "14px")
+        .attr("font-size", "12px") // Reduced from 14px
         .attr("font-weight", "bold")
         .attr("font-family", "serif")
         .text(sign.symbol);
       
-      // Sign name
+      // Sign name - closer to symbol and smaller
       svg.append("text")
         .attr("x", textX)
-        .attr("y", textY + 32)
+        .attr("y", textY + 25) // Reduced from 32
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
         .attr("fill", sign.color)
-        .attr("font-size", "11px")
+        .attr("font-size", "10px") // Reduced from 11px
         .attr("font-weight", "500")
         .attr("opacity", 0.9)
         .text(sign.sign);
@@ -691,10 +692,11 @@ const BirthChartPage: React.FC = () => {
             .attr("stroke-width", 3)
             .attr("opacity", 1);
           
-          // Add user sign label
+          // Add user sign label with better positioning
           const labelAngle = (sign.angle + 15) * Math.PI / 180;
-          const labelX = centerX + (radius * 0.75) * Math.cos(labelAngle);
-          const labelY = centerY + (radius * 0.75) * Math.sin(labelAngle);
+          const labelRadius = radius * 0.65; // Move labels closer to center to avoid edge cropping
+          const labelX = centerX + labelRadius * Math.cos(labelAngle);
+          const labelY = centerY + labelRadius * Math.sin(labelAngle);
           
           let userLabel = '';
           let labelColor = sign.color;
@@ -703,24 +705,24 @@ const BirthChartPage: React.FC = () => {
           else if (sign.sign === ascSignName) userLabel = 'Your Asc';
           
           if (userLabel) {
-            // Label background
+            // Smaller label background for better fit
             svg.append("rect")
-              .attr("x", labelX - 35)
-              .attr("y", labelY - 10)
-              .attr("width", 70)
-              .attr("height", 20)
+              .attr("x", labelX - 30)
+              .attr("y", labelY - 8)
+              .attr("width", 60)
+              .attr("height", 16)
               .attr("fill", "#000000")
-              .attr("fill-opacity", 0.8)
-              .attr("rx", 10);
+              .attr("fill-opacity", 0.85)
+              .attr("rx", 8);
             
-            // Label text
+            // Smaller label text
             svg.append("text")
               .attr("x", labelX)
-              .attr("y", labelY + 3)
+              .attr("y", labelY + 2)
               .attr("text-anchor", "middle")
               .attr("dominant-baseline", "middle")
               .attr("fill", labelColor)
-              .attr("font-size", "11px")
+              .attr("font-size", "10px")
               .attr("font-weight", "bold")
               .attr("font-family", "Arial, sans-serif")
               .text(userLabel);
@@ -766,14 +768,14 @@ const BirthChartPage: React.FC = () => {
           .attr("font-family", "serif")
           .text("☉");
         
-        // Sun sign label
+        // Sun sign label with better positioning
         svg.append("text")
           .attr("x", sunX)
-          .attr("y", sunY + 40)
+          .attr("y", sunY + 35) // Reduced distance to prevent cropping
           .attr("text-anchor", "middle")
           .attr("dominant-baseline", "middle")
           .attr("fill", "#FDB813")
-          .attr("font-size", "12px")
+          .attr("font-size", "11px") // Slightly smaller font
           .attr("font-weight", "bold")
           .attr("font-family", "Arial, sans-serif")
           .text(sunSignName);
@@ -817,14 +819,14 @@ const BirthChartPage: React.FC = () => {
           .attr("font-family", "serif")
           .text("☽");
         
-        // Moon sign label
+        // Moon sign label with better positioning
         svg.append("text")
           .attr("x", moonX)
-          .attr("y", moonY + 35)
+          .attr("y", moonY + 30) // Reduced distance to prevent cropping
           .attr("text-anchor", "middle")
           .attr("dominant-baseline", "middle")
           .attr("fill", "#6366F1")
-          .attr("font-size", "12px")
+          .attr("font-size", "11px") // Slightly smaller font
           .attr("font-weight", "bold")
           .attr("font-family", "Arial, sans-serif")
           .text(moonSignName);
@@ -868,14 +870,14 @@ const BirthChartPage: React.FC = () => {
           .attr("font-family", "serif")
           .text("⇅");
         
-        // Ascendant sign label
+        // Ascendant sign label with better positioning
         svg.append("text")
           .attr("x", ascX)
-          .attr("y", ascY + 30)
+          .attr("y", ascY + 25) // Reduced distance to prevent cropping
           .attr("text-anchor", "middle")
           .attr("dominant-baseline", "middle")
           .attr("fill", "#A855F7")
-          .attr("font-size", "12px")
+          .attr("font-size", "11px") // Slightly smaller font
           .attr("font-weight", "bold")
           .attr("font-family", "Arial, sans-serif")
           .text(ascSignName);
