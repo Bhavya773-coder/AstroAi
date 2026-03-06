@@ -2,40 +2,49 @@ const axios = require('axios');
 
 class LLMService {
   constructor() {
-    this.modelEndpoint = process.env.LLM_MODEL_ENDPOINT || 'http://localhost:8080/v1/chat/completions';
+    // Update to use Ollama's default port and API format
+    this.modelEndpoint = process.env.LLM_MODEL_ENDPOINT || 'http://localhost:11434/api/generate';
     this.modelName = process.env.LLM_MODEL_NAME || 'gpt-oss:120B';
   }
 
   async callLLM(prompt) {
     try {
+      // Use Ollama API format
       const response = await axios.post(this.modelEndpoint, {
         model: this.modelName,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an astrology and numerology expert. Always respond with valid JSON only.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000
+        prompt: prompt,
+        stream: false,
+        options: {
+          temperature: 0.7,
+          num_predict: 2000
+        }
       }, {
-        timeout: 10000, // Reduced timeout to fail faster
+        timeout: 30000, // Increased timeout for larger models
         headers: {
           'Content-Type': 'application/json'
         }
       });
 
-      return response.data;
+      // Ollama returns response in a different format
+      if (response.data && response.data.response) {
+        // Convert Ollama response to OpenAI-like format for compatibility
+        return {
+          choices: [{
+            message: {
+              content: response.data.response
+            }
+          }]
+        };
+      }
+
+      throw new Error('Invalid response from Ollama');
+
     } catch (error) {
       console.error('LLM API Error:', error.message);
       // If it's a connection error, provide a helpful message
       if (error.code === 'ECONNREFUSED') {
         console.error('LLM service is not running at', this.modelEndpoint);
-        console.error('Please start the LLM service or check the configuration');
+        console.error('Please start Ollama service: ollama serve');
       }
       throw error;
     }
