@@ -13,6 +13,51 @@ const MainPage: React.FC = () => {
   const [horoscopeLoading, setHoroscopeLoading] = useState(false);
   const [lastRequestTime, setLastRequestTime] = useState<number>(0);
 
+  const getCurrentDate = () => {
+    return new Date().toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
+  const fetchHoroscope = useCallback(async () => {
+    if (horoscopeLoading) return;
+    
+    // Prevent rapid requests (minimum 5 seconds between requests)
+    const now = Date.now();
+    if (now - lastRequestTime < 5000) {
+      console.log('Preventing rapid request, last was', Math.round((now - lastRequestTime) / 1000), 'seconds ago');
+      return;
+    }
+    
+    setLastRequestTime(now);
+    setHoroscopeLoading(true);
+    
+    try {
+      console.log('Fetching horoscope from API...');
+      const response = await apiFetch('/api/horoscope/daily');
+      console.log('Horoscope response:', response);
+      
+      if (response && response.success) {
+        setHoroscope(response.data);
+        console.log('Horoscope set successfully:', response.data);
+      } else if (response && response.status === 429) {
+        console.log('Rate limited, using existing horoscope if available');
+        // Don't clear existing horoscope on rate limit
+      } else {
+        console.error('Horoscope API response unsuccessful:', response);
+      }
+    } catch (error: any) {
+      console.error('Error fetching horoscope:', error);
+      console.error('Error details:', error?.message || error?.toString());
+      // Don't clear existing horoscope on error
+    } finally {
+      setHoroscopeLoading(false);
+    }
+  }, [horoscopeLoading, lastRequestTime]);
+
   useEffect(() => {
     const checkInsightStatus = async () => {
       try {
@@ -56,76 +101,14 @@ const MainPage: React.FC = () => {
     checkInsightStatus();
   }, []);
 
-  const handleGettingStarted = () => {
-    navigate('/onboarding/step-1');
-  };
-
-  const fetchHoroscope = useCallback(async () => {
-    if (horoscopeLoading) return;
-    
-    // Prevent rapid requests (minimum 5 seconds between requests)
-    const now = Date.now();
-    if (now - lastRequestTime < 5000) {
-      console.log('Preventing rapid request, last was', Math.round((now - lastRequestTime) / 1000), 'seconds ago');
-      return;
-    }
-    
-    setLastRequestTime(now);
-    setHoroscopeLoading(true);
-    
-    try {
-      console.log('Fetching horoscope from API...');
-      const response = await apiFetch('/api/horoscope/daily');
-      console.log('Horoscope response:', response);
-      
-      if (response && response.success) {
-        setHoroscope(response.data);
-        console.log('Horoscope set successfully:', response.data);
-      } else if (response && response.status === 429) {
-        console.log('Rate limited, using existing horoscope if available');
-        // Don't clear existing horoscope on rate limit
-      } else {
-        console.error('Horoscope API response unsuccessful:', response);
-      }
-    } catch (error: any) {
-      console.error('Error fetching horoscope:', error);
-      console.error('Error details:', error?.message || error?.toString());
-      // Don't clear existing horoscope on error
-    } finally {
-      setHoroscopeLoading(false);
-    }
-  }, [horoscopeLoading, lastRequestTime]);
-
   useEffect(() => {
     if (insightsGenerated && !apiError) {
       fetchHoroscope();
     }
-  }, [insightsGenerated, apiError, fetchHoroscope]);
+  }, [insightsGenerated, apiError]);
 
-  const getCurrentDate = () => {
-    const options: Intl.DateTimeFormatOptions = { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    };
-    return new Date().toLocaleDateString('en-US', options);
-  };
-
-  const getMoonPhase = () => {
-    // Simple moon phase calculation
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    
-    let julianDate = (year - 2000) * 365.25 + (month - 1) * 30.44 + day;
-    let phase = (julianDate % 29.53) / 29.53;
-    
-    if (phase < 0.25) return "🌑 New Moon";
-    if (phase < 0.5) return "🌓 First Quarter";
-    if (phase < 0.75) return "🌕 Full Moon";
-    return "🌗 Last Quarter";
+  const handleGettingStarted = () => {
+    navigate('/onboarding/step-1');
   };
 
   return (
@@ -153,55 +136,42 @@ const MainPage: React.FC = () => {
           })}
         </svg>
       </div>
-
       {/* Navigation Header */}
       <AppNavbar />
 
-      {/* Main Dashboard Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Header */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white font-display mb-2">
-                Welcome to Your Cosmic Journey
-              </h1>
-              <p className="text-lg text-white/75">
-                {getCurrentDate()} • {getMoonPhase()}
-              </p>
+      {/* Hero Section */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-white font-display mb-4">
+            Your Cosmic Dashboard
+          </h1>
+          <p className="text-xl text-white/70 max-w-3xl mx-auto mb-8">
+            Track your growth, refine your profile, and generate astrology & numerology insights.
+          </p>
+          
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-4 h-4 bg-custom-yellow rounded-full animate-pulse"></div>
+              <span className="text-gray-300">Loading your cosmic profile...</span>
             </div>
-          </div>
-        </div>
-
-        {/* Getting Started Section */}
-        {!isLoading && (!insightsGenerated || apiError) && (
-          <div className="mb-8">
-            <div className="bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-blue-500/20 border border-purple-400/30 rounded-2xl p-8 backdrop-blur-sm">
-              <div className="text-center">
-                <div className="text-6xl mb-4">🌙</div>
-                <h2 className="text-2xl font-bold text-white mb-4">Begin Your Astrological Journey</h2>
-                <p className="text-white/80 mb-6 max-w-2xl mx-auto">
-                  Create your cosmic profile to unlock personalized birth chart insights, 
-                  numerology readings, and compatibility analysis.
-                </p>
+          )}
+          
+          {/* Conditional Buttons */}
+          {!isLoading && (
+            <div className="space-y-4">
+              {(!insightsGenerated || apiError) && (
                 <button 
                   onClick={handleGettingStarted}
-                  className="bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-gray-900 font-bold py-3 px-8 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="bg-custom-yellow hover:bg-yellow-400 text-gray-900 font-semibold py-3 px-8 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
                 >
-                  ✨ Getting Started
+                  Getting Started
                 </button>
-              </div>
+              )}
+              
             </div>
-          </div>
-        )}
-
-        {/* Loading State */}
-        {isLoading && (
-          <div className="flex items-center justify-center space-x-2 mb-8">
-            <div className="w-4 h-4 bg-custom-yellow rounded-full animate-pulse"></div>
-            <span className="text-gray-300">Loading your cosmic profile...</span>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Main Dashboard Grid */}
         {insightsGenerated && !apiError && (
@@ -329,34 +299,6 @@ const MainPage: React.FC = () => {
                 )}
               </div>
             </div>
-
-            {/* Service Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-400/30 rounded-2xl p-6 backdrop-blur-sm">
-                <h3 className="text-xl font-bold text-white mb-4">Your Cosmic Stats</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/70">Life Path Number</span>
-                    <span className="text-blue-300 font-bold">7</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/70">Ruling Planet</span>
-                    <span className="text-purple-300 font-bold">Jupiter</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/70">Element</span>
-                    <span className="text-orange-300 font-bold">Fire</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/70">Power Day</span>
-                    <span className="text-green-300 font-bold">Thursday</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/70">Lucky Color</span>
-                    <span className="text-yellow-300 font-bold">Gold</span>
-                  </div>
-                </div>
-              </div>
 
             {/* Service Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
