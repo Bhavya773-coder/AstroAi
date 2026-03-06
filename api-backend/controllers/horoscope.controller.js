@@ -4,19 +4,35 @@ const Profile = require('../models/Profile');
 class HoroscopeController {
   async getDailyHoroscope(req, res) {
     try {
-      // Get user's profile to find their zodiac sign
-      const profile = await Profile.findOne({ user_id: req.user.id });
+      console.log('Fetching horoscope for user:', req.user);
+      console.log('User ID:', req.user.userId);
       
-      if (!profile || !profile.birth_chart_data) {
+      // Get user's profile to find their zodiac sign
+      const profile = await Profile.findOne({ user_id: req.user.userId });
+      
+      console.log('Found profile:', profile ? 'Yes' : 'No');
+      
+      if (!profile) {
         return res.status(404).json({
           success: false,
-          message: 'User profile or birth chart data not found. Please complete your profile first.'
+          message: 'User profile not found. Please complete your profile first.'
         });
       }
+
+      if (!profile.birth_chart_data) {
+        return res.status(404).json({
+          success: false,
+          message: 'Birth chart data not found. Please complete your profile first.'
+        });
+      }
+
+      console.log('Birth chart data:', profile.birth_chart_data);
 
       // Extract zodiac sign from birth chart data
       const zodiacSign = profile.birth_chart_data.sun_sign || 
                           profile.birth_chart_data.enhanced_birth_chart_data?.sun_sign?.sign;
+
+      console.log('Extracted zodiac sign:', zodiacSign);
 
       if (!zodiacSign) {
         return res.status(404).json({
@@ -149,7 +165,7 @@ class HoroscopeController {
 
   async getHoroscopeHistory(req, res) {
     try {
-      const profile = await Profile.findOne({ user_id: req.user.id });
+      const profile = await Profile.findOne({ user_id: req.user.userId });
       
       if (!profile || !profile.daily_horoscopes) {
         return res.status(404).json({

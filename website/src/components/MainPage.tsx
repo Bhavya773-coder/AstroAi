@@ -65,14 +65,19 @@ const MainPage: React.FC = () => {
     
     setHoroscopeLoading(true);
     try {
+      console.log('Fetching horoscope from API...');
       const response = await apiFetch('/api/horoscope/daily');
       console.log('Horoscope response:', response);
       
       if (response && response.success) {
         setHoroscope(response.data);
+        console.log('Horoscope set successfully:', response.data);
+      } else {
+        console.error('Horoscope API response unsuccessful:', response);
       }
     } catch (error: any) {
       console.error('Error fetching horoscope:', error);
+      console.error('Error details:', error?.message || error?.toString());
     } finally {
       setHoroscopeLoading(false);
     }
