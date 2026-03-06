@@ -392,36 +392,36 @@ const AIChatPage: React.FC = () => {
                 <div ref={messagesEndRef} />
               </div>
             )}
+          </div>
 
-            <div className="border-t border-slate-700/30 p-4">
-              <div className="flex gap-3">
-                <div className="flex-1 relative">
-                  <textarea
-                    ref={inputRef}
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Ask me about your life, career, relationships..."
-                    className="w-full bg-slate-800/50 border border-slate-700/50 text-white px-4 py-3 rounded-xl resize-none focus:outline-none focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
-                    rows={1}
-                    disabled={isLoading}
-                  />
-                  <div className="absolute bottom-3 right-3 text-gray-400 text-xs">
-                    {inputMessage.length}/2000
-                  </div>
+          <div className="border-t border-slate-700/30 p-4">
+            <div className="flex gap-3">
+              <div className="flex-1 relative">
+                <textarea
+                  ref={inputRef}
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Ask me about your life, career, relationships..."
+                  className="w-full bg-slate-800/50 border border-slate-700/50 text-white px-4 py-3 rounded-xl resize-none focus:outline-none focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
+                  rows={1}
+                  disabled={isLoading}
+                />
+                <div className="absolute bottom-3 right-3 text-gray-400 text-xs">
+                  {inputMessage.length}/2000
                 </div>
-                <button
-                  onClick={sendMessage}
-                  disabled={!inputMessage.trim() || isLoading}
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-500 disabled:to-gray-600 text-white p-3 rounded-xl transition-all duration-200 flex items-center justify-center disabled:opacity-50"
-                >
-                  {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <span className="text-lg">{getProfessionalSymbol('📤')}</span>
-                  )}
-                </button>
               </div>
+              <button
+                onClick={sendMessage}
+                disabled={!inputMessage.trim() || isLoading}
+                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-500 disabled:to-gray-600 text-white p-3 rounded-xl transition-all duration-200 flex items-center justify-center disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <span className="text-lg">{getProfessionalSymbol('📤')}</span>
+                )}
+              </button>
             </div>
           </div>
         </div>
