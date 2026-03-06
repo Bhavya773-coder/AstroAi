@@ -323,7 +323,7 @@ const AIChatPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4">
             {messages.length === 0 && !isLoading ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4 text-blue-400">{getProfessionalSymbol('🤖')}</div>
@@ -333,7 +333,7 @@ const AIChatPage: React.FC = () => {
                 </p>
               </div>
             ) : (
-              <>
+              <div className="space-y-4">
                 {messages.map((message, index) => (
                   <div
                     key={message._id || index.toString()}
@@ -390,73 +390,73 @@ const AIChatPage: React.FC = () => {
                     </div>
                 )}
                 <div ref={messagesEndRef} />
-              </>
-            )}
-          </div>
-
-          <div className="border-t border-slate-700/30 p-4">
-            <div className="flex gap-3">
-              <div className="flex-1 relative">
-                <textarea
-                  ref={inputRef}
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Ask me about your life, career, relationships..."
-                  className="w-full bg-slate-800/50 border border-slate-700/50 text-white px-4 py-3 rounded-xl resize-none focus:outline-none focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
-                  rows={1}
-                  disabled={isLoading}
-                />
-                <div className="absolute bottom-3 right-3 text-gray-400 text-xs">
-                  {inputMessage.length}/2000
-                </div>
               </div>
-              <button
-                onClick={sendMessage}
-                disabled={!inputMessage.trim() || isLoading}
-                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-500 disabled:to-gray-600 text-white p-3 rounded-xl transition-all duration-200 flex items-center justify-center disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                  <span className="text-lg">{getProfessionalSymbol('📤')}</span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+            )}
 
-      {showNewConversationModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-white mb-4">New Conversation</h3>
-            <input
-              type="text"
-              value={conversationTitle}
-              onChange={(e) => setConversationTitle(e.target.value)}
-              placeholder="Enter conversation title (optional)"
-              className="w-full bg-slate-700/50 border border-slate-600/50 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
-              autoFocus
-            />
-            <div className="flex gap-3 mt-4">
-              <button
-                onClick={() => setShowNewConversationModal(false)}
-                className="flex-1 bg-slate-700/50 hover:bg-slate-600/50 text-white py-2 px-4 rounded-lg transition-colors duration-200"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={createNewConversation}
-                disabled={!conversationTitle.trim()}
-                className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-500 disabled:to-gray-600 text-white py-2 px-4 rounded-lg transition-all duration-200 disabled:opacity-50"
-              >
-                Create
-              </button>
+            <div className="border-t border-slate-700/30 p-4">
+              <div className="flex gap-3">
+                <div className="flex-1 relative">
+                  <textarea
+                    ref={inputRef}
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Ask me about your life, career, relationships..."
+                    className="w-full bg-slate-800/50 border border-slate-700/50 text-white px-4 py-3 rounded-xl resize-none focus:outline-none focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
+                    rows={1}
+                    disabled={isLoading}
+                  />
+                  <div className="absolute bottom-3 right-3 text-gray-400 text-xs">
+                    {inputMessage.length}/2000
+                  </div>
+                </div>
+                <button
+                  onClick={sendMessage}
+                  disabled={!inputMessage.trim() || isLoading}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-500 disabled:to-gray-600 text-white p-3 rounded-xl transition-all duration-200 flex items-center justify-center disabled:opacity-50"
+                >
+                  {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <span className="text-lg">{getProfessionalSymbol('📤')}</span>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      )}
+
+        {showNewConversationModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6 max-w-md w-full mx-4">
+              <h3 className="text-xl font-bold text-white mb-4">New Conversation</h3>
+              <input
+                type="text"
+                value={conversationTitle}
+                onChange={(e) => setConversationTitle(e.target.value)}
+                placeholder="Enter conversation title (optional)"
+                className="w-full bg-slate-700/50 border border-slate-600/50 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
+                autoFocus
+              />
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={() => setShowNewConversationModal(false)}
+                  className="flex-1 bg-slate-700/50 hover:bg-slate-600/50 text-white py-2 px-4 rounded-lg transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={createNewConversation}
+                  disabled={!conversationTitle.trim()}
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-500 disabled:to-gray-600 text-white py-2 px-4 rounded-lg transition-all duration-200 disabled:opacity-50"
+                >
+                  Create
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
