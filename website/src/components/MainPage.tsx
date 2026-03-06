@@ -126,28 +126,6 @@ const MainPage: React.FC = () => {
                 {getCurrentDate()} • {getMoonPhase()}
               </p>
             </div>
-            
-            {/* Quick Actions */}
-            <div className="mt-4 md:mt-0 flex flex-wrap gap-3">
-              <button 
-                onClick={() => navigate('/birth-chart')}
-                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                🌟 Birth Chart
-              </button>
-              <button 
-                onClick={() => navigate('/numerology')}
-                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                🔢 Numerology
-              </button>
-              <button 
-                onClick={() => navigate('/reports')}
-                className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                📊 Reports
-              </button>
-            </div>
           </div>
         </div>
 
