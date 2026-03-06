@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
 import AppNavbar from './AppNavbar';
@@ -8,7 +8,6 @@ const MainPage: React.FC = () => {
   const [insightsGenerated, setInsightsGenerated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
-  const [userData, setUserData] = useState<any>(null);
   const [horoscope, setHoroscope] = useState<any>(null);
   const [horoscopeLoading, setHoroscopeLoading] = useState(false);
 
@@ -35,7 +34,6 @@ const MainPage: React.FC = () => {
         if (response.success && response.profile) {
           console.log('Setting insightsGenerated to:', response.profile.insights_generated);
           setInsightsGenerated(response.profile.insights_generated || false);
-          setUserData(response.profile);
           setApiError(false);
         } else {
           console.log('Invalid response format, defaulting to false');
@@ -60,7 +58,7 @@ const MainPage: React.FC = () => {
     navigate('/onboarding/step-1');
   };
 
-  const fetchHoroscope = async () => {
+  const fetchHoroscope = useCallback(async () => {
     if (horoscopeLoading) return;
     
     setHoroscopeLoading(true);
@@ -81,7 +79,7 @@ const MainPage: React.FC = () => {
     } finally {
       setHoroscopeLoading(false);
     }
-  };
+  }, [horoscopeLoading]);
 
   useEffect(() => {
     if (insightsGenerated && !apiError) {

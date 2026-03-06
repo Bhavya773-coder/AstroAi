@@ -1,12 +1,10 @@
 const llmService = require('../services/llmService');
 const Profile = require('../models/Profile');
 
-class HoroscopeController {
-  constructor() {
-    // Simple in-memory rate limiting to prevent spam
-    this.requestCache = new Map();
-  }
+// Global request cache for rate limiting
+const requestCache = new Map();
 
+class HoroscopeController {
   // Simple, robust horoscope data that doesn't require AI
   static getSimpleHoroscope(zodiacSign, currentDate) {
     const horoscopes = {
@@ -237,7 +235,7 @@ class HoroscopeController {
       const now = Date.now();
       
       // Simple rate limiting: prevent multiple requests within 30 seconds
-      const lastRequest = this.requestCache.get(userId);
+      const lastRequest = requestCache.get(userId);
       if (lastRequest && (now - lastRequest) < 30000) {
         console.log('Rate limiting user:', userId, 'Last request was', Math.round((now - lastRequest) / 1000), 'seconds ago');
         return res.status(429).json({
@@ -247,7 +245,7 @@ class HoroscopeController {
       }
       
       // Update last request time
-      this.requestCache.set(userId, now);
+      requestCache.set(userId, now);
       
       console.log('Fetching horoscope for user:', req.user);
       console.log('User ID:', userId);
