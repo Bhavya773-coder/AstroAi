@@ -3,6 +3,9 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const LLMService = require('../services/llmService');
 
+// Initialize LLMService
+const llmService = new LLMService();
+
 // GPT Chat endpoint
 router.post('/chat', auth.requireAuth, async (req, res) => {
   try {
@@ -18,24 +21,20 @@ router.post('/chat', auth.requireAuth, async (req, res) => {
     console.log(`GPT Chat request from user ${req.user.userId}:`, message);
 
     // Use LLMService to get response from GPT-OSS:120B
-    const response = await LLMService.generateResponse({
-      prompt: message,
-      model: model,
-      temperature: 0.7,
-      maxTokens: 2000,
-      context: [] // No conversation history for GPT chat
-    });
+    const response = await llmService.callLLM(message);
 
-    if (!response) {
-      throw new Error('Failed to generate response from GPT-OSS');
+    if (!response || !response.choices || !response.choices[0] || !response.choices[0].message) {
+      throw new Error('Invalid response from GPT-OSS');
     }
+
+    const aiResponse = response.choices[0].message.content;
 
     console.log(`GPT-OSS response generated for user ${req.user.userId}`);
 
     res.json({
       success: true,
       data: {
-        response: response,
+        response: aiResponse,
         model: model,
         timestamp: new Date()
       }
@@ -43,11 +42,21 @@ router.post('/chat', auth.requireAuth, async (req, res) => {
 
   } catch (error) {
     console.error('Error in GPT chat:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to process chat request',
-      error: error.message
-    });
+    
+    // If it's a connection error, provide a helpful response
+    if (error.code === 'ECONNREFUSED') {
+      res.status(503).json({
+        success: false,
+        message: 'GPT-OSS service is currently unavailable. Please try again later.',
+        error: 'Service temporarily unavailable'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to process chat request',
+        error: error.message
+      });
+    }
   }
 });
 
