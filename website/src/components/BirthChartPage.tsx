@@ -604,17 +604,17 @@ const BirthChartPage: React.FC = () => {
       const moonSignData = zodiacSigns.find(s => s.sign === moonSignName);
       const ascSignData = zodiacSigns.find(s => s.sign === ascSignName);
 
-      // Draw Sun (☉)
+      // Draw Sun (☉) - positioned to avoid conflicts
       if (sunSignData) {
-        const sunAngle = (sunSignData.angle + Math.random() * 20 - 10) * Math.PI / 180; // Add some variation
-        const sunX = centerX + (radius * 0.6) * Math.cos(sunAngle);
-        const sunY = centerY + (radius * 0.6) * Math.sin(sunAngle);
+        const sunAngle = (sunSignData.angle + Math.random() * 15 - 7.5) * Math.PI / 180; // Reduced variation
+        const sunX = centerX + (radius * 0.55) * Math.cos(sunAngle); // Moved closer to center
+        const sunY = centerY + (radius * 0.55) * Math.sin(sunAngle); // Moved closer to center
         
         // Sun circle with glow
         svg.append("circle")
           .attr("cx", sunX)
           .attr("cy", sunY)
-          .attr("r", 12)
+          .attr("r", 11) // Slightly smaller
           .attr("fill", "#ffd700")
           .attr("stroke", "#ff8c00")
           .attr("stroke-width", 2)
@@ -626,23 +626,23 @@ const BirthChartPage: React.FC = () => {
           .attr("text-anchor", "middle")
           .attr("dominant-baseline", "middle")
           .attr("fill", "#8b4513")
-          .attr("font-size", "14px")
+          .attr("font-size", "13px") // Slightly smaller
           .attr("font-weight", "bold")
           .attr("font-family", "serif")
           .text("☉");
       }
 
-      // Draw Moon (☽)
+      // Draw Moon (☽) - positioned to avoid conflicts
       if (moonSignData) {
-        const moonAngle = (moonSignData.angle + Math.random() * 20 - 10) * Math.PI / 180;
-        const moonX = centerX + (radius * 0.7) * Math.cos(moonAngle);
-        const moonY = centerY + (radius * 0.7) * Math.sin(moonAngle);
+        const moonAngle = (moonSignData.angle + Math.random() * 15 - 7.5) * Math.PI / 180; // Reduced variation
+        const moonX = centerX + (radius * 0.65) * Math.cos(moonAngle); // Moved closer to center
+        const moonY = centerY + (radius * 0.65) * Math.sin(moonAngle); // Moved closer to center
         
         // Moon circle
         svg.append("circle")
           .attr("cx", moonX)
           .attr("cy", moonY)
-          .attr("r", 10)
+          .attr("r", 9) // Slightly smaller
           .attr("fill", "#c0c0c0")
           .attr("stroke", "#808080")
           .attr("stroke-width", 2)
@@ -654,33 +654,34 @@ const BirthChartPage: React.FC = () => {
           .attr("text-anchor", "middle")
           .attr("dominant-baseline", "middle")
           .attr("fill", "#2f4f4f")
-          .attr("font-size", "12px")
+          .attr("font-size", "11px") // Slightly smaller
           .attr("font-weight", "bold")
           .attr("font-family", "serif")
           .text("☽");
       }
 
-      // Draw Ascendant (ASC)
+      // Draw Ascendant (ASC) - positioned to avoid overlap
       if (ascSignData) {
         const ascAngle = ascSignData.angle * Math.PI / 180;
-        const ascX = centerX + (radius * 0.85) * Math.cos(ascAngle);
-        const ascY = centerY + (radius * 0.85) * Math.sin(ascAngle);
+        const ascX = centerX + (radius * 0.75) * Math.cos(ascAngle); // Moved closer to center
+        const ascY = centerY + (radius * 0.75) * Math.sin(ascAngle); // Moved closer to center
         
-        // Ascendant triangle
+        // Ascendant triangle with better positioning
         svg.append("polygon")
-          .attr("points", `${ascX},${ascY-8} ${ascX-6},${ascY+4} ${ascX+6},${ascY+4}`)
+          .attr("points", `${ascX},${ascY-6} ${ascX-5},${ascY+3} ${ascX+5},${ascY+3}`)
           .attr("fill", "#9370db")
           .attr("stroke", "#4b0082")
           .attr("stroke-width", 2)
           .attr("filter", "drop-shadow(0 0 6px rgba(147, 112, 219, 0.6))");
         
+        // ASC label positioned to avoid overlap
         svg.append("text")
           .attr("x", ascX)
-          .attr("y", ascY + 20)
+          .attr("y", ascY + 15) // Reduced distance to prevent overlap
           .attr("text-anchor", "middle")
           .attr("dominant-baseline", "middle")
           .attr("fill", "#9370db")
-          .attr("font-size", "10px")
+          .attr("font-size", "9px") // Smaller font
           .attr("font-weight", "bold")
           .attr("font-family", "Arial, sans-serif")
           .text("ASC");
@@ -1053,7 +1054,9 @@ const BirthChartPage: React.FC = () => {
             <div className="bg-gradient-to-br from-slate-900/50 to-indigo-900/50 backdrop-blur-sm rounded-3xl p-8 border border-white/10 shadow-2xl">
               <h2 className="text-2xl font-bold text-white mb-2 text-center">Professional Birth Chart</h2>
               <p className="text-white/70 text-center mb-6">Traditional astrological wheel with planetary positions</p>
-              <div className="relative">
+              
+              {/* Chart Container */}
+              <div className="relative mb-8">
                 <svg
                   ref={svgRef}
                   width="450"
@@ -1061,25 +1064,29 @@ const BirthChartPage: React.FC = () => {
                   viewBox="0 0 450 450"
                   className="w-full max-w-md rounded-2xl overflow-hidden"
                 />
-                {/* Professional Legend */}
-                <div className="absolute -bottom-4 left-0 right-0 bg-black/90 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                  <div className="flex justify-around text-xs">
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
-                      <span className="text-yellow-300 font-semibold">Sun (☉)</span>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
-                      <span className="text-gray-300 font-semibold">Moon (☽)</span>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
-                      <span className="text-purple-300 font-semibold">Ascendant (ASC)</span>
-                    </div>
+              </div>
+              
+              {/* Professional Legend - Moved Below Chart */}
+              <div className="bg-black/80 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                <div className="flex justify-around text-xs mb-3">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                    <span className="text-yellow-300 font-semibold">Sun (☉)</span>
                   </div>
-                  <div className="text-center mt-2 text-white/60 text-xs">
-                    Traditional astrological chart with 12 houses and zodiac signs
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
+                    <span className="text-gray-300 font-semibold">Moon (☽)</span>
                   </div>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
+                    <span className="text-purple-300 font-semibold">Ascendant (ASC)</span>
+                  </div>
+                </div>
+                <div className="text-center text-white/60 text-xs">
+                  Traditional astrological chart with 12 houses and zodiac signs
+                </div>
+                <div className="text-center text-white/50 text-xs mt-2">
+                  Chart dynamically updates based on your birth data
                 </div>
               </div>
             </div>
