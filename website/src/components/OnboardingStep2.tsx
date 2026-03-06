@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getProfessionalSymbol } from '../utils/professionalSymbols';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';

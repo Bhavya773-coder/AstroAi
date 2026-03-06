@@ -10,13 +10,16 @@ const OnboardingStep3: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('Analyzing birth details...');
 
-  const progressSteps = [
-    'Analyzing birth details...',
-    'Calculating numerology patterns...',
-    'Mapping your life blueprint...'
-  ];
-
   useEffect(() => {
+    const progressSteps = [
+      'Analyzing birth details...',
+      'Calculating planetary positions...',
+      'Generating birth chart insights...',
+      'Computing numerology patterns...',
+      'Creating personalized recommendations...',
+      'Finalizing your cosmic profile...'
+    ];
+
     const generateInsights = async () => {
       try {
         // Simulate progress updates
@@ -67,7 +70,7 @@ const OnboardingStep3: React.FC = () => {
     };
 
     generateInsights();
-  }, [navigate, progressSteps]);
+  }, [navigate]);
 
   if (error) {
     return (
