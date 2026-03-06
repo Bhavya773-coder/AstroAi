@@ -329,25 +329,42 @@ const BirthChartPage: React.FC = () => {
 
         const response = await apiFetch('/api/birth-chart');
         
-        if (response.success && response.birthChart) {
-          setBirthChartData(response.birthChart);
-          // Store individual zodiac signs for display
-          setZodiacData({
-            sunSign: response.sunSign || 'Leo',
-            moonSign: response.moonSign || 'Taurus',
-            ascendant: response.ascendant || 'Leo',
-            dominantPlanet: response.dominantPlanet || 'Sun'
-          });
-          // Fetch detailed zodiac information for user's signs
-          await fetchZodiacDetails({
-            sun_sign: response.sunSign,
-            moon_sign: response.moonSign,
-            ascendant: response.ascendant,
-            dominant_planet: response.dominantPlanet
-          });
-        } else if (response.success && !response.birthChart) {
-          // User doesn't have birth chart data
-          setBirthChartData(null);
+        if (response.success) {
+          if (response.birthChart) {
+            setBirthChartData(response.birthChart);
+            // Store individual zodiac signs for display
+            setZodiacData({
+              sunSign: response.sunSign || 'Leo',
+              moonSign: response.moonSign || 'Taurus',
+              ascendant: response.ascendant || 'Leo',
+              dominantPlanet: response.dominantPlanet || 'Sun'
+            });
+            // Fetch detailed zodiac information for user's signs
+            await fetchZodiacDetails({
+              sun_sign: response.sunSign,
+              moon_sign: response.moonSign,
+              ascendant: response.ascendant,
+              dominant_planet: response.dominantPlanet
+            });
+          } else if (response.message && response.message.includes('Generate your insights')) {
+            // User needs to generate insights first
+            setBirthChartData(null);
+            setZodiacData({
+              sunSign: '',
+              moonSign: '',
+              ascendant: '',
+              dominantPlanet: ''
+            });
+          } else {
+            // Other case where birth chart is not available
+            setBirthChartData(null);
+            setZodiacData({
+              sunSign: '',
+              moonSign: '',
+              ascendant: '',
+              dominantPlanet: ''
+            });
+          }
         } else {
           setError('Failed to load birth chart data');
         }
@@ -986,8 +1003,25 @@ const BirthChartPage: React.FC = () => {
               </div>
             </div>
           </div>
+        ) : birthChartData === null ? (
+          /* User needs to generate insights first */
+          <div className="mb-12 text-center">
+            <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-12 border border-white/10">
+              <div className="text-6xl mb-6">🔮</div>
+              <h3 className="text-2xl font-bold text-white mb-4">Generate Your Birth Chart</h3>
+              <p className="text-white/80 text-lg mb-8">
+                Complete your birth chart generation to unlock your personalized zodiac insights and cosmic profile.
+              </p>
+              <button
+                onClick={() => navigate('/onboarding')}
+                className="bg-gradient-to-r from-purple-400 to-blue-400 hover:from-purple-300 hover:to-blue-300 text-white font-bold text-lg py-3 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                Generate Birth Chart
+              </button>
+            </div>
+          </div>
         ) : (
-          /* Error Safety - Show message when zodiac data is not available */
+          /* Loading state or other error */
           <div className="mb-12 text-center">
             <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-12 border border-white/10">
               <div className="text-6xl mb-6">⚠️</div>

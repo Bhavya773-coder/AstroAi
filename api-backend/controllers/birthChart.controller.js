@@ -42,10 +42,25 @@ const getBirthChart = async (req, res, next) => {
 
     // Check if insights have been generated
     if (!profile.insights_generated) {
+      // Try to generate basic zodiac data from birth date even if insights aren't generated
+      const basicZodiacData = llmService.getEnhancedDefaultBirthChart({
+        full_name: profile.full_name,
+        date_of_birth: profile.date_of_birth,
+        time_of_birth: profile.time_of_birth,
+        place_of_birth: profile.place_of_birth,
+        gender: profile.gender,
+        life_context: profile.life_context,
+        numerology_data: profile.numerology_data
+      });
+
       return res.json({
         success: true,
-        message: 'Generate your insights to unlock birth chart',
-        birthChart: null
+        message: 'Generate your insights to unlock detailed birth chart analysis',
+        birthChart: basicZodiacData,
+        sunSign: basicZodiacData.enhanced_birth_chart_data.sun_sign.sign,
+        moonSign: basicZodiacData.enhanced_birth_chart_data.moon_sign.sign,
+        ascendant: basicZodiacData.enhanced_birth_chart_data.ascendant.sign,
+        dominantPlanet: basicZodiacData.enhanced_birth_chart_data.dominant_planet.planet
       });
     }
 
