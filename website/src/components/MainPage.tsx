@@ -219,7 +219,7 @@ const MainPage: React.FC = () => {
                     <button 
                       onClick={fetchHoroscope}
                       disabled={horoscopeLoading}
-                      className="text-purple-300 hover:text-purple-200 transition-colors disabled:opacity-50"
+                      className="text-yellow-300 hover:text-yellow-200 transition-colors disabled:opacity-50"
                       title="Refresh horoscope"
                     >
                       {getProfessionalSymbol('🔄')}
@@ -235,7 +235,7 @@ const MainPage: React.FC = () => {
                 ) : horoscope ? (
                   <div className="bg-black/30 rounded-xl p-6 mb-4">
                     <div className="text-center mb-4">
-                      <div className="text-4xl mb-3">{getProfessionalSymbol('✨')}</div>
+                      <div className="text-4xl mb-3 text-yellow-300">{getProfessionalSymbol('✨')}</div>
                       <h4 className="text-lg font-semibold text-yellow-300 mb-2">
                         {horoscope.overall_theme || 'Cosmic Energy'}
                       </h4>
@@ -267,17 +267,17 @@ const MainPage: React.FC = () => {
                     {/* Daily Stats */}
                     <div className="grid grid-cols-3 gap-4 text-center mb-4">
                       <div>
-                        <div className="text-2xl mb-1">{getProfessionalSymbol('🎯')}</div>
+                        <div className="text-2xl mb-1 text-yellow-300">{getProfessionalSymbol('🎯')}</div>
                         <div className="text-sm text-white/70">Mood</div>
                         <div className="text-lg font-bold text-purple-400">{horoscope.mood || 'Balanced'}</div>
                       </div>
                       <div>
-                        <div className="text-2xl mb-1">{getProfessionalSymbol('⚡')}</div>
+                        <div className="text-2xl mb-1 text-orange-400">{getProfessionalSymbol('⚡')}</div>
                         <div className="text-sm text-white/70">Energy</div>
                         <div className="text-lg font-bold text-orange-400">{horoscope.energy_level || 'Medium'}</div>
                       </div>
                       <div>
-                        <div className="text-2xl mb-1">{getProfessionalSymbol('🍀')}</div>
+                        <div className="text-2xl mb-1 text-green-400">{getProfessionalSymbol('🍀')}</div>
                         <div className="text-sm text-white/70">Lucky</div>
                         <div className="text-lg font-bold text-green-400">{horoscope.lucky_number || 7}</div>
                       </div>
@@ -286,13 +286,13 @@ const MainPage: React.FC = () => {
                     {/* Advice */}
                     <div className="text-center p-3 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-lg">
                       <p className="text-white/90 text-sm italic">
-                        {getProfessionalSymbol('💫')} {horoscope.advice || 'Trust your intuition today'}
+                        <span className="text-yellow-300">{getProfessionalSymbol('💫')}</span> {horoscope.advice || 'Trust your intuition today'}
                       </p>
                     </div>
                   </div>
                 ) : (
                   <div className="bg-black/30 rounded-xl p-6 text-center">
-                    <div className="text-4xl mb-3">{getProfessionalSymbol('🌙')}</div>
+                    <div className="text-4xl mb-3 text-purple-300">{getProfessionalSymbol('🌙')}</div>
                     <p className="text-white/60">Unable to load horoscope</p>
                     <button 
                       onClick={fetchHoroscope}
