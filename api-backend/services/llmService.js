@@ -13,13 +13,13 @@ class LLMService {
       console.log('Endpoint:', this.modelEndpoint);
       console.log('Prompt:', prompt);
       
-      // Use Ollama API format with correct model name
+      // Use Ollama API format with no time limitations
       const response = await axios.post(this.modelEndpoint, {
         model: this.modelName,
         prompt: prompt,
         stream: false
       }, {
-        timeout: 60000, // Increased timeout for 65GB model
+        timeout: 300000, // 5 minutes - removed time barrier for large model
         headers: {
           'Content-Type': 'application/json'
         }
