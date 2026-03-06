@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getProfessionalSymbol } from '../utils/professionalSymbols';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
 import AppNavbar from './AppNavbar';
@@ -257,15 +258,15 @@ const NumerologyPage: React.FC = () => {
             </div>
             <div className="space-y-4">
               <div className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 border border-violet-400/30 rounded-xl p-4">
-                <h3 className="text-violet-300 font-semibold mb-2">🌟 Core Principle</h3>
+                <h3 className="text-violet-300 font-semibold mb-2">{getProfessionalSymbol('🌟')} Core Principle</h3>
                 <p className="text-white/60 text-sm">Everything in the universe vibrates at specific frequencies, and numbers are the language of these vibrations.</p>
               </div>
               <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-400/30 rounded-xl p-4">
-                <h3 className="text-purple-300 font-semibold mb-2">📊 Mathematical Foundation</h3>
+                <h3 className="text-purple-300 font-semibold mb-2">{getProfessionalSymbol('📊')} Mathematical Foundation</h3>
                 <p className="text-white/60 text-sm">Your birth date and name are reduced to single digits (except master numbers) to reveal your core numbers.</p>
               </div>
               <div className="bg-gradient-to-br from-pink-500/10 to-rose-500/10 border border-pink-400/30 rounded-xl p-4">
-                <h3 className="text-pink-300 font-semibold mb-2">🎯 Life Application</h3>
+                <h3 className="text-pink-300 font-semibold mb-2">{getProfessionalSymbol('🎯')} Life Application</h3>
                 <p className="text-white/60 text-sm">Use your numbers to understand relationships, career paths, timing, and personal growth opportunities.</p>
               </div>
             </div>
@@ -285,14 +286,14 @@ const NumerologyPage: React.FC = () => {
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-400/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-blue-400 text-2xl">🏛️</span>
+                <span className="text-blue-400 text-2xl">{getProfessionalSymbol('🏛️')}</span>
               </div>
               <h3 className="text-blue-300 font-semibold mb-2">Greek Philosophy</h3>
               <p className="text-white/60 text-sm">Pythagoras, the "Father of Mathematics," developed the modern system of numerology we use today.</p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-emerald-400/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-emerald-400 text-2xl">🕉️</span>
+                <span className="text-emerald-400 text-2xl">{getProfessionalSymbol('🕉️')}</span>
               </div>
               <h3 className="text-emerald-300 font-semibold mb-2">Eastern Wisdom</h3>
               <p className="text-white/60 text-sm">Chinese numerology and Indian Vedic traditions have long recognized the power of numbers in daily life.</p>
@@ -364,7 +365,7 @@ const NumerologyPage: React.FC = () => {
         {isLoading ? (
           <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-violet-400/20 rounded-full mb-6 animate-pulse">
-              <span className="text-violet-400 text-2xl">✨</span>
+              <span className="text-violet-400 text-2xl">{getProfessionalSymbol('✨')}</span>
             </div>
             <h3 className="text-xl font-semibold text-white mb-3">Loading Your Numerology Insights</h3>
             <p className="text-white/60 max-w-md mx-auto">
@@ -374,7 +375,7 @@ const NumerologyPage: React.FC = () => {
         ) : error ? (
           <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-red-500/20 rounded-full mb-6">
-              <span className="text-red-400 text-2xl">⚠️</span>
+              <span className="text-red-400 text-2xl">{getProfessionalSymbol('⚠️')}</span>
             </div>
             <h3 className="text-xl font-semibold text-white mb-3">Unable to Load Insights</h3>
             <p className="text-white/60 mb-8 max-w-md mx-auto">
@@ -400,7 +401,7 @@ const NumerologyPage: React.FC = () => {
             {/* Success Header */}
             <div className="text-center mb-12">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-green-500/20 rounded-full mb-6">
-                <span className="text-green-400 text-3xl">✨</span>
+                <span className="text-green-400 text-3xl">{getProfessionalSymbol('✨')}</span>
               </div>
               <h3 className="text-3xl font-bold text-white mb-4">Your Personal Numerology Blueprint</h3>
               <p className="text-white/60 max-w-3xl mx-auto text-lg">
@@ -414,7 +415,7 @@ const NumerologyPage: React.FC = () => {
                 <div className="flex items-center justify-between mb-4">
                   <div className="text-violet-300 text-sm font-medium uppercase tracking-wider">Life Path</div>
                   <div className="w-8 h-8 bg-violet-400/20 rounded-full flex items-center justify-center">
-                    <span className="text-violet-400 text-sm">🛤️</span>
+                    <span className="text-violet-400 text-sm">{getProfessionalSymbol('🛤️')}</span>
                   </div>
                 </div>
                 <div className="text-5xl font-bold text-violet-300 mb-3">{numerology.life_path}</div>
@@ -433,7 +434,7 @@ const NumerologyPage: React.FC = () => {
                 <div className="flex items-center justify-between mb-4">
                   <div className="text-purple-300 text-sm font-medium uppercase tracking-wider">Destiny Number</div>
                   <div className="w-8 h-8 bg-purple-400/20 rounded-full flex items-center justify-center">
-                    <span className="text-purple-400 text-sm">🎯</span>
+                    <span className="text-purple-400 text-sm">{getProfessionalSymbol('🎯')}</span>
                   </div>
                 </div>
                 <div className="text-5xl font-bold text-purple-300 mb-3">{numerology.destiny}</div>
@@ -531,7 +532,7 @@ const NumerologyPage: React.FC = () => {
               <h4 className="text-2xl font-semibold text-white mb-6">How to Apply Your Numbers</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <h5 className="text-xl font-medium text-white mb-4">🎯 Career & Success</h5>
+                  <h5 className="text-xl font-medium text-white mb-4">{getProfessionalSymbol('🎯')} Career & Success</h5>
                   <p className="text-white/70 text-sm leading-relaxed mb-3">
                     Use your Life Path {numerology.life_path} to choose a career that aligns with your natural abilities. Your Destiny {numerology.destiny} shows your ultimate potential for success.
                   </p>
@@ -581,7 +582,7 @@ const NumerologyPage: React.FC = () => {
             {(numerology.life_path === '11' || numerology.life_path === '22' || numerology.life_path === '33' ||
               numerology.destiny === '11' || numerology.destiny === '22' || numerology.destiny === '33') && (
               <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-400/30 rounded-2xl p-8 mb-8">
-                <h4 className="text-2xl font-semibold text-amber-300 mb-4">🌟 Master Number Alert!</h4>
+                <h4 className="text-2xl font-semibold text-amber-300 mb-4">{getProfessionalSymbol('🌟')} Master Number Alert!</h4>
                 <p className="text-white/70 leading-relaxed mb-4">
                   You have one or more Master Numbers in your chart! Master Numbers (11, 22, 33) carry higher spiritual potential and greater challenges. They indicate you're here to make a significant impact on the world.
                 </p>
