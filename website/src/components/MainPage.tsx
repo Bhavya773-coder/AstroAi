@@ -207,9 +207,9 @@ const MainPage: React.FC = () => {
         {insightsGenerated && !apiError && (
           <>
             {/* Featured Insights */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div className="flex justify-center mb-8">
               {/* Daily Horoscope */}
-              <div className="lg:col-span-2 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-400/30 rounded-2xl p-6 backdrop-blur-sm">
+              <div className="w-full max-w-4xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-400/30 rounded-2xl p-6 backdrop-blur-sm">
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-white mb-2">Your Daily Horoscope</h3>
                   <div className="flex items-center justify-center gap-3">
@@ -328,8 +328,10 @@ const MainPage: React.FC = () => {
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* Quick Stats
+            {/* Service Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-400/30 rounded-2xl p-6 backdrop-blur-sm">
                 <h3 className="text-xl font-bold text-white mb-4">Your Cosmic Stats</h3>
                 <div className="space-y-4">
@@ -354,8 +356,7 @@ const MainPage: React.FC = () => {
                     <span className="text-yellow-300 font-bold">Gold</span>
                   </div>
                 </div>
-              </div> */}
-            </div>
+              </div>
 
             {/* Service Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
