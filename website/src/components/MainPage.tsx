@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
-import { getProfessionalSymbol } from '../utils/professionalSymbols';
+import { getProfessionalSymbol, cleanAdviceText } from '../utils/professionalSymbols';
 import AppNavbar from './AppNavbar';
 
 const MainPage: React.FC = () => {
@@ -210,10 +210,10 @@ const MainPage: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
               {/* Daily Horoscope */}
               <div className="lg:col-span-2 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-400/30 rounded-2xl p-6 backdrop-blur-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-white">Your Daily Horoscope</h3>
-                  <div className="flex items-center gap-2">
-                    <span className="text-purple-300 text-sm">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-white mb-2">Your Daily Horoscope</h3>
+                  <div className="flex items-center justify-center gap-3">
+                    <span className="text-purple-300 text-sm font-medium">
                       {horoscope?.zodiac_sign || 'Loading...'}
                     </span>
                     <button 
@@ -298,7 +298,7 @@ const MainPage: React.FC = () => {
                         <h4 className="text-yellow-300 font-semibold text-sm">Daily Guidance</h4>
                       </div>
                       <p className="text-white/95 text-sm leading-relaxed">
-                        {horoscope.advice || 'Trust your intuition today'}
+                        {cleanAdviceText(horoscope.advice) || 'Trust your intuition today'}
                       </p>
                     </div>
                   </div>

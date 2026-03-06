@@ -81,6 +81,13 @@ export const replaceEmojis = (text: string): string => {
   return result;
 };
 
+// Helper function to clean advice text and remove unwanted symbols
+export const cleanAdviceText = (text: string): string => {
+  if (!text) return text;
+  // Remove warning symbols and clean up the text
+  return text.replace(/^⚠\s*/i, '').trim();
+};
+
 // Helper function to get professional symbol for emoji
 export const getProfessionalSymbol = (emoji: string): string => {
   return (professionalSymbols as any)[emoji] || emoji;
