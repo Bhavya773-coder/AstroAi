@@ -3,7 +3,7 @@ const Profile = require('../models/Profile');
 
 class HoroscopeController {
   // Simple, robust horoscope data that doesn't require AI
-  getSimpleHoroscope(zodiacSign, currentDate) {
+  static getSimpleHoroscope(zodiacSign, currentDate) {
     const horoscopes = {
       'Aries': {
         overall_theme: 'Dynamic Energy',
@@ -278,7 +278,7 @@ class HoroscopeController {
       const cachedHoroscope = profile.daily_horoscopes && profile.daily_horoscopes[today];
       
       if (cachedHoroscope) {
-        console.log('Returning cached horoscope');
+        console.log('Returning cached horoscope for:', cachedHoroscope.zodiac_sign);
         return res.status(200).json({
           success: true,
           data: cachedHoroscope,
@@ -288,7 +288,7 @@ class HoroscopeController {
 
       // Generate simple, robust horoscope (no AI dependency)
       console.log('Generating simple horoscope for:', zodiacSign);
-      const horoscopeData = this.getSimpleHoroscope(zodiacSign, currentDate);
+      const horoscopeData = HoroscopeController.getSimpleHoroscope(zodiacSign, currentDate);
       
       // Add date and zodiac sign to the horoscope
       const completeHoroscope = {
