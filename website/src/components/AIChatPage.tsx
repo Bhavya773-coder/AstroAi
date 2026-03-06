@@ -35,17 +35,14 @@ const AIChatPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Load conversations on mount
   useEffect(() => {
     loadConversations();
   }, []);
 
-  // Load messages when conversation changes
   useEffect(() => {
     if (currentConversationId) {
       loadMessages(currentConversationId);
@@ -110,7 +107,6 @@ const AIChatPage: React.FC = () => {
       created_at: new Date()
     };
 
-    // Add user message immediately
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
@@ -129,20 +125,9 @@ const AIChatPage: React.FC = () => {
       if (response?.success) {
         const aiMessage: Message = response.data;
         setMessages(prev => [...prev, aiMessage]);
-        
-        // Update conversation title if this is the first message
-        if (messages.length === 0 && conversations.length > 0) {
-          const updatedConversations = conversations.map(conv => 
-            conv._id === currentConversationId 
-              ? { ...conv, updated_at: new Date() }
-              : conv
-          );
-          setConversations(updatedConversations);
-        }
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      // Add error message
       const errorMessage: Message = {
         conversation_id: currentConversationId,
         role: 'assistant',
@@ -215,7 +200,6 @@ const AIChatPage: React.FC = () => {
     }
   };
 
-  // Auto-resize textarea
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.style.height = 'auto';
@@ -225,7 +209,6 @@ const AIChatPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950">
-      {/* Background Effects */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <svg className="h-full w-full" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -249,13 +232,10 @@ const AIChatPage: React.FC = () => {
         </svg>
       </div>
 
-      {/* Navigation Header */}
       <AppNavbar />
 
       <div className="flex h-screen pt-16">
-        {/* Sidebar */}
         <div className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 bg-slate-900/50 backdrop-blur-md border-r border-slate-700/30 flex flex-col`}>
-          {/* Sidebar Header */}
           <div className="p-4 border-b border-slate-700/30">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
@@ -276,7 +256,6 @@ const AIChatPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Conversations List */}
           <div className="flex-1 overflow-y-auto p-4">
             {conversations.length === 0 ? (
               <div className="text-center py-8">
@@ -319,9 +298,7 @@ const AIChatPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Chat Area */}
         <div className="flex-1 flex flex-col bg-slate-900/30">
-          {/* Chat Header */}
           <div className="bg-slate-800/50 border-b border-slate-700/30 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -346,7 +323,6 @@ const AIChatPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.length === 0 && !isLoading ? (
               <div className="text-center py-12">
@@ -418,7 +394,6 @@ const AIChatPage: React.FC = () => {
             )}
           </div>
 
-          {/* Input Area */}
           <div className="border-t border-slate-700/30 p-4">
             <div className="flex gap-3">
               <div className="flex-1 relative">
@@ -452,7 +427,6 @@ const AIChatPage: React.FC = () => {
         </div>
       </div>
 
-      {/* New Conversation Modal */}
       {showNewConversationModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6 max-w-md w-full mx-4">
