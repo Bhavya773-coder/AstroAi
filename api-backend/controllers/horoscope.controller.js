@@ -275,7 +275,11 @@ class HoroscopeController {
 
       // Check if we already have a horoscope for today (cache for performance)
       const today = new Date().toDateString();
+      console.log('Today date string:', today);
+      console.log('Profile daily_horoscopes:', profile.daily_horoscopes);
+      
       const cachedHoroscope = profile.daily_horoscopes && profile.daily_horoscopes[today];
+      console.log('Cached horoscope found:', cachedHoroscope ? 'Yes' : 'No');
       
       if (cachedHoroscope) {
         console.log('Returning cached horoscope for:', cachedHoroscope.zodiac_sign);
@@ -302,15 +306,20 @@ class HoroscopeController {
         profile.daily_horoscopes = {};
       }
       profile.daily_horoscopes[today] = completeHoroscope;
+      console.log('Caching horoscope for date:', today);
+      console.log('Updated daily_horoscopes:', profile.daily_horoscopes);
       
       // Keep only last 7 days of horoscopes to save space
       const horoscopeKeys = Object.keys(profile.daily_horoscopes);
       if (horoscopeKeys.length > 7) {
         const oldestKey = horoscopeKeys[0];
         delete profile.daily_horoscopes[oldestKey];
+        console.log('Removed oldest cache entry:', oldestKey);
       }
 
+      console.log('Saving profile with horoscope cache...');
       await profile.save();
+      console.log('Profile saved successfully');
 
       console.log('Horoscope generated and cached successfully');
 
