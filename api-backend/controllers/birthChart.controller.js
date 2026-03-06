@@ -79,11 +79,18 @@ const getBirthChart = async (req, res, next) => {
         });
 
         if (birthChartAnalysis && birthChartAnalysis.enhanced_birth_chart_data) {
-          // Update profile with generated birth chart data
+          const enhancedData = birthChartAnalysis.enhanced_birth_chart_data;
+          
+          // Update profile with generated birth chart data (extract strings from objects)
           await Profile.updateOne(
             { user_id: userId },
             {
-              birth_chart_data: birthChartAnalysis.enhanced_birth_chart_data,
+              birth_chart_data: {
+                sun_sign: enhancedData.sun_sign?.sign || enhancedData.sun_sign,
+                moon_sign: enhancedData.moon_sign?.sign || enhancedData.moon_sign,
+                ascendant: enhancedData.ascendant?.sign || enhancedData.ascendant,
+                dominant_planet: enhancedData.dominant_planet?.planet || enhancedData.dominant_planet
+              },
               insights_generated: true,
               insights_generated_at: new Date(),
               updated_at: new Date()
@@ -131,16 +138,17 @@ const getBirthChart = async (req, res, next) => {
 
     // Update profile with detailed birth chart if new analysis provides better data
     if (birthChartAnalysis && birthChartAnalysis.enhanced_birth_chart_data) {
+      const enhancedData = birthChartAnalysis.enhanced_birth_chart_data;
+      
       await Profile.updateOne(
         { user_id: userId },
         {
           birth_chart_data: {
             ...profile.birth_chart_data,
-            ...birthChartAnalysis.enhanced_birth_chart_data,
-            detailed_analysis: birthChartAnalysis.detailed_analysis,
-            planetary_positions: birthChartAnalysis.planetary_positions,
-            aspects: birthChartAnalysis.aspects,
-            houses: birthChartAnalysis.houses
+            sun_sign: enhancedData.sun_sign?.sign || enhancedData.sun_sign,
+            moon_sign: enhancedData.moon_sign?.sign || enhancedData.moon_sign,
+            ascendant: enhancedData.ascendant?.sign || enhancedData.ascendant,
+            dominant_planet: enhancedData.dominant_planet?.planet || enhancedData.dominant_planet
           },
           updated_at: new Date()
         }

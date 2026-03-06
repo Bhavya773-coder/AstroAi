@@ -23,7 +23,7 @@ class LLMService {
         temperature: 0.7,
         max_tokens: 2000
       }, {
-        timeout: 30000,
+        timeout: 10000, // Reduced timeout to fail faster
         headers: {
           'Content-Type': 'application/json'
         }
@@ -32,6 +32,11 @@ class LLMService {
       return response.data;
     } catch (error) {
       console.error('LLM API Error:', error.message);
+      // If it's a connection error, provide a helpful message
+      if (error.code === 'ECONNREFUSED') {
+        console.error('LLM service is not running at', this.modelEndpoint);
+        console.error('Please start the LLM service or check the configuration');
+      }
       throw error;
     }
   }
