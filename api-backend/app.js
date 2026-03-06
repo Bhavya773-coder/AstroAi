@@ -20,6 +20,7 @@ const conversationsRoutes = require('./routes/conversations.routes');
 const growthMetricsRoutes = require('./routes/growthMetrics.routes');
 const compatibilityReportsRoutes = require('./routes/compatibilityReports.routes');
 const horoscopeRoutes = require('./routes/horoscope.routes');
+const chatRoutes = require('./routes/chat.routes');
 
 const app = express();
 
@@ -59,6 +60,7 @@ app.use('/api/conversations', conversationsRoutes);
 app.use('/api/growth-metrics', growthMetricsRoutes);
 app.use('/api/compatibility-reports', compatibilityReportsRoutes);
 app.use('/api/horoscope', horoscopeRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

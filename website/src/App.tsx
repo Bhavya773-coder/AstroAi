@@ -17,6 +17,7 @@ import BirthChartPage from './components/BirthChartPage';
 import ReportsPage from './components/ReportsPage';
 import SignUpPage from './components/SignUpPage';
 import ProtectedRoute from './auth/ProtectedRoute';
+import AIChatPage from './components/AIChatPage';
 
 function App() {
   return (
@@ -79,6 +80,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ReportsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ai-chat"
+            element={
+              <ProtectedRoute>
+                <AIChatPage />
               </ProtectedRoute>
             }
           />

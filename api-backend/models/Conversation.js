@@ -1,24 +1,30 @@
 const mongoose = require('mongoose');
 
-const ConversationSchema = new mongoose.Schema(
-  {
-    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    title: { type: String },
-    created_at: { type: Date, default: Date.now },
-    updated_at: { type: Date }
+const conversationSchema = new mongoose.Schema({
+  user_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
-  { collection: 'conversations' }
-);
-
-ConversationSchema.pre('save', function (next) {
-  if (!this.created_at) this.created_at = new Date();
-  this.updated_at = new Date();
-  next();
+  title: {
+    type: String,
+    default: 'New Conversation',
+    maxlength: 100
+  },
+  created_at: {
+    type: Date,
+    default: Date.now
+  },
+  updated_at: {
+    type: Date,
+    default: Date.now
+  }
+}, {
+  timestamps: false, // We use our own created_at and updated_at fields
+  collection: 'conversations'
 });
 
-ConversationSchema.pre('findOneAndUpdate', function (next) {
-  this.set({ updated_at: new Date() });
-  next();
-});
+// Index for faster queries
+conversationSchema.index({ user_id: 1, updated_at: -1 });
 
-module.exports = mongoose.model('Conversation', ConversationSchema);
+module.exports = mongoose.model('Conversation', conversationSchema);
