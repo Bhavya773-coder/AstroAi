@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const horoscopeController = require('../controllers/horoscope.controller');
-const auth = require('../middleware/auth');
+const { requireAuth } = require('../middleware/auth');
 
 // Get today's horoscope for the authenticated user
-router.get('/daily', auth.authenticateToken, horoscopeController.getDailyHoroscope);
+router.get('/daily', requireAuth, horoscopeController.getDailyHoroscope);
 
 // Get horoscope history for the authenticated user
-router.get('/history', auth.authenticateToken, horoscopeController.getHoroscopeHistory);
+router.get('/history', requireAuth, horoscopeController.getHoroscopeHistory);
 
 module.exports = router;
