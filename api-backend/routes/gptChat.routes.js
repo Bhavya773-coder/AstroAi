@@ -1,10 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const LLMService = require('../services/llmService');
-
-// Initialize LLMService
-const llmService = new LLMService();
+const llmService = require('../services/llmService');
 
 // GPT Chat endpoint
 router.post('/chat', auth.requireAuth, async (req, res) => {
