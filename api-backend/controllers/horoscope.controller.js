@@ -232,20 +232,6 @@ class HoroscopeController {
   async getDailyHoroscope(req, res) {
     try {
       const userId = req.user.userId;
-      const now = Date.now();
-      
-      // Simple rate limiting: prevent multiple requests within 30 seconds
-      const lastRequest = requestCache.get(userId);
-      if (lastRequest && (now - lastRequest) < 30000) {
-        console.log('Rate limiting user:', userId, 'Last request was', Math.round((now - lastRequest) / 1000), 'seconds ago');
-        return res.status(429).json({
-          success: false,
-          message: 'Please wait a moment before requesting another horoscope.'
-        });
-      }
-      
-      // Update last request time
-      requestCache.set(userId, now);
       
       console.log('Fetching horoscope for user:', req.user);
       console.log('User ID:', userId);

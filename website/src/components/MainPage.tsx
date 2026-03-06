@@ -10,6 +10,7 @@ const MainPage: React.FC = () => {
   const [apiError, setApiError] = useState(false);
   const [horoscope, setHoroscope] = useState<any>(null);
   const [horoscopeLoading, setHoroscopeLoading] = useState(false);
+  const [lastRequestTime, setLastRequestTime] = useState<number>(0);
 
   useEffect(() => {
     const checkInsightStatus = async () => {
@@ -61,7 +62,16 @@ const MainPage: React.FC = () => {
   const fetchHoroscope = useCallback(async () => {
     if (horoscopeLoading) return;
     
+    // Prevent rapid requests (minimum 5 seconds between requests)
+    const now = Date.now();
+    if (now - lastRequestTime < 5000) {
+      console.log('Preventing rapid request, last was', Math.round((now - lastRequestTime) / 1000), 'seconds ago');
+      return;
+    }
+    
+    setLastRequestTime(now);
     setHoroscopeLoading(true);
+    
     try {
       console.log('Fetching horoscope from API...');
       const response = await apiFetch('/api/horoscope/daily');
@@ -70,16 +80,20 @@ const MainPage: React.FC = () => {
       if (response && response.success) {
         setHoroscope(response.data);
         console.log('Horoscope set successfully:', response.data);
+      } else if (response && response.status === 429) {
+        console.log('Rate limited, using existing horoscope if available');
+        // Don't clear existing horoscope on rate limit
       } else {
         console.error('Horoscope API response unsuccessful:', response);
       }
     } catch (error: any) {
       console.error('Error fetching horoscope:', error);
       console.error('Error details:', error?.message || error?.toString());
+      // Don't clear existing horoscope on error
     } finally {
       setHoroscopeLoading(false);
     }
-  }, [horoscopeLoading]);
+  }, [horoscopeLoading, lastRequestTime]);
 
   useEffect(() => {
     if (insightsGenerated && !apiError) {
