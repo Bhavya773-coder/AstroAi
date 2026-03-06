@@ -650,126 +650,241 @@ const BirthChartPage: React.FC = () => {
       console.log('Drawing cosmic wheel with signs:', { sunSignName, moonSignName, ascSignName });
       console.log('Found sign data:', { sunSignData, moonSignData, ascSignData });
 
-      // Draw Sun with professional styling
+      // Highlight user's zodiac segments with special styling
+      zodiacSignsData.forEach((sign, index) => {
+        const isUserSign = sign.sign === sunSignName || sign.sign === moonSignName || sign.sign === ascSignName;
+        
+        if (isUserSign) {
+          const startAngle = sign.angle * Math.PI / 180;
+          const endAngle = (sign.angle + 30) * Math.PI / 180;
+          
+          const x1 = centerX + radius * Math.cos(startAngle);
+          const y1 = centerY + radius * Math.sin(startAngle);
+          const x2 = centerX + radius * Math.cos(endAngle);
+          const y2 = centerY + radius * Math.sin(endAngle);
+          
+          const largeArcFlag = endAngle - startAngle > Math.PI ? 1 : 0;
+          
+          // Highlight user's segment with brighter gradient
+          const userSegmentGradient = defs.append("linearGradient")
+            .attr("id", `userSegment${index}Gradient`)
+            .attr("x1", "0%")
+            .attr("y1", "0%")
+            .attr("x2", "100%")
+            .attr("y2", "100%");
+          
+          userSegmentGradient.append("stop")
+            .attr("offset", "0%")
+            .attr("stop-color", sign.color)
+            .attr("stop-opacity", 0.6);
+          
+          userSegmentGradient.append("stop")
+            .attr("offset", "100%")
+            .attr("stop-color", sign.color)
+            .attr("stop-opacity", 0.3);
+          
+          // Draw highlighted segment
+          svg.append("path")
+            .attr("d", `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`)
+            .attr("fill", `url(#userSegment${index}Gradient)`)
+            .attr("stroke", sign.color)
+            .attr("stroke-width", 3)
+            .attr("opacity", 1);
+          
+          // Add user sign label
+          const labelAngle = (sign.angle + 15) * Math.PI / 180;
+          const labelX = centerX + (radius * 0.75) * Math.cos(labelAngle);
+          const labelY = centerY + (radius * 0.75) * Math.sin(labelAngle);
+          
+          let userLabel = '';
+          let labelColor = sign.color;
+          if (sign.sign === sunSignName) userLabel = 'Your Sun';
+          else if (sign.sign === moonSignName) userLabel = 'Your Moon';
+          else if (sign.sign === ascSignName) userLabel = 'Your Asc';
+          
+          if (userLabel) {
+            // Label background
+            svg.append("rect")
+              .attr("x", labelX - 35)
+              .attr("y", labelY - 10)
+              .attr("width", 70)
+              .attr("height", 20)
+              .attr("fill", "#000000")
+              .attr("fill-opacity", 0.8)
+              .attr("rx", 10);
+            
+            // Label text
+            svg.append("text")
+              .attr("x", labelX)
+              .attr("y", labelY + 3)
+              .attr("text-anchor", "middle")
+              .attr("dominant-baseline", "middle")
+              .attr("fill", labelColor)
+              .attr("font-size", "11px")
+              .attr("font-weight", "bold")
+              .attr("font-family", "Arial, sans-serif")
+              .text(userLabel);
+          }
+        }
+      });
+
+      // Draw Sun with enhanced styling for user's personal sun sign
       if (sunSignData) {
         const sunAngle = sunSignData.angle * Math.PI / 180;
         const sunX = centerX + (radius * 0.5) * Math.cos(sunAngle);
         const sunY = centerY + (radius * 0.5) * Math.sin(sunAngle);
         
-        // Sun glow effect
-        for (let i = 3; i > 0; i--) {
+        // Enhanced sun glow effect
+        for (let i = 4; i > 0; i--) {
           svg.append("circle")
             .attr("cx", sunX)
             .attr("cy", sunY)
-            .attr("r", 25 + (i * 8))
+            .attr("r", 30 + (i * 10))
             .attr("fill", "url(#sunGradient)")
-            .attr("opacity", 0.1 * i);
+            .attr("opacity", 0.15 * i);
         }
         
-        // Main sun circle
+        // Main sun circle with enhanced styling
         svg.append("circle")
           .attr("cx", sunX)
           .attr("cy", sunY)
-          .attr("r", 18)
+          .attr("r", 22)
           .attr("fill", "url(#sunGradient)")
           .attr("stroke", "#FDB813")
-          .attr("stroke-width", 2)
-          .attr("filter", "drop-shadow(0 0 10px rgba(253, 184, 19, 0.5))");
+          .attr("stroke-width", 3)
+          .attr("filter", "drop-shadow(0 0 15px rgba(253, 184, 19, 0.8))");
         
-        // Sun symbol
+        // Sun symbol with larger size
         svg.append("text")
           .attr("x", sunX)
-          .attr("y", sunY + 4)
+          .attr("y", sunY + 5)
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "middle")
+          .attr("fill", "#FFFFFF")
+          .attr("font-size", "22px")
+          .attr("font-weight", "bold")
+          .attr("font-family", "serif")
+          .text("☉");
+        
+        // Sun sign label
+        svg.append("text")
+          .attr("x", sunX)
+          .attr("y", sunY + 40)
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "middle")
+          .attr("fill", "#FDB813")
+          .attr("font-size", "12px")
+          .attr("font-weight", "bold")
+          .attr("font-family", "Arial, sans-serif")
+          .text(sunSignName);
+      }
+
+      // Draw Moon with enhanced styling for user's personal moon sign
+      if (moonSignData) {
+        const moonAngle = moonSignData.angle * Math.PI / 180;
+        const moonX = centerX + (radius * 0.7) * Math.cos(moonAngle);
+        const moonY = centerY + (radius * 0.7) * Math.sin(moonAngle);
+        
+        // Enhanced moon glow effect
+        for (let i = 3; i > 0; i--) {
+          svg.append("circle")
+            .attr("cx", moonX)
+            .attr("cy", moonY)
+            .attr("r", 20 + (i * 8))
+            .attr("fill", "url(#moonGradient)")
+            .attr("opacity", 0.15 * i);
+        }
+        
+        // Main moon circle with enhanced styling
+        svg.append("circle")
+          .attr("cx", moonX)
+          .attr("cy", moonY)
+          .attr("r", 16)
+          .attr("fill", "url(#moonGradient)")
+          .attr("stroke", "#6366F1")
+          .attr("stroke-width", 3)
+          .attr("filter", "drop-shadow(0 0 12px rgba(99, 102, 241, 0.8))");
+        
+        // Moon symbol with larger size
+        svg.append("text")
+          .attr("x", moonX)
+          .attr("y", moonY + 4)
           .attr("text-anchor", "middle")
           .attr("dominant-baseline", "middle")
           .attr("fill", "#FFFFFF")
           .attr("font-size", "18px")
           .attr("font-weight", "bold")
           .attr("font-family", "serif")
-          .text("☉");
-      }
-
-      // Draw Moon with professional styling
-      if (moonSignData) {
-        const moonAngle = moonSignData.angle * Math.PI / 180;
-        const moonX = centerX + (radius * 0.7) * Math.cos(moonAngle);
-        const moonY = centerY + (radius * 0.7) * Math.sin(moonAngle);
+          .text("☽");
         
-        // Moon glow effect
-        for (let i = 3; i > 0; i--) {
-          svg.append("circle")
-            .attr("cx", moonX)
-            .attr("cy", moonY)
-            .attr("r", 20 + (i * 6))
-            .attr("fill", "url(#moonGradient)")
-            .attr("opacity", 0.1 * i);
-        }
-        
-        // Main moon circle
-        svg.append("circle")
-          .attr("cx", moonX)
-          .attr("cy", moonY)
-          .attr("r", 14)
-          .attr("fill", "url(#moonGradient)")
-          .attr("stroke", "#6366F1")
-          .attr("stroke-width", 2)
-          .attr("filter", "drop-shadow(0 0 8px rgba(99, 102, 241, 0.5))");
-        
-        // Moon symbol
+        // Moon sign label
         svg.append("text")
           .attr("x", moonX)
-          .attr("y", moonY + 3)
+          .attr("y", moonY + 35)
           .attr("text-anchor", "middle")
           .attr("dominant-baseline", "middle")
-          .attr("fill", "#FFFFFF")
-          .attr("font-size", "16px")
+          .attr("fill", "#6366F1")
+          .attr("font-size", "12px")
           .attr("font-weight", "bold")
-          .attr("font-family", "serif")
-          .text("☽");
+          .attr("font-family", "Arial, sans-serif")
+          .text(moonSignName);
       }
 
-      // Draw Ascendant with professional styling
+      // Draw Ascendant with enhanced styling for user's personal ascendant sign
       if (ascSignData) {
         const ascAngle = ascSignData.angle * Math.PI / 180;
         const ascX = centerX + (radius * 0.3) * Math.cos(ascAngle);
         const ascY = centerY + (radius * 0.3) * Math.sin(ascAngle);
         
-        // Ascendant glow effect
+        // Enhanced ascendant glow effect
         for (let i = 2; i > 0; i--) {
           svg.append("circle")
             .attr("cx", ascX)
             .attr("cy", ascY)
-            .attr("r", 15 + (i * 5))
+            .attr("r", 15 + (i * 6))
             .attr("fill", "url(#ascGradient)")
-            .attr("opacity", 0.1 * i);
+            .attr("opacity", 0.15 * i);
         }
         
-        // Main ascendant circle
+        // Main ascendant circle with enhanced styling
         svg.append("circle")
           .attr("cx", ascX)
           .attr("cy", ascY)
-          .attr("r", 11)
+          .attr("r", 12)
           .attr("fill", "url(#ascGradient)")
-          .attr("stroke", "#F472B6")
-          .attr("stroke-width", 2)
-          .attr("filter", "drop-shadow(0 0 6px rgba(244, 114, 182, 0.5))");
+          .attr("stroke", "#A855F7")
+          .attr("stroke-width", 3)
+          .attr("filter", "drop-shadow(0 0 10px rgba(168, 85, 247, 0.8))");
         
-        // Ascendant symbol
+        // Ascendant symbol with larger size
         svg.append("text")
           .attr("x", ascX)
           .attr("y", ascY + 3)
           .attr("text-anchor", "middle")
           .attr("dominant-baseline", "middle")
           .attr("fill", "#FFFFFF")
-          .attr("font-size", "14px")
+          .attr("font-size", "16px")
           .attr("font-weight", "bold")
           .attr("font-family", "serif")
           .text("⇅");
+        
+        // Ascendant sign label
+        svg.append("text")
+          .attr("x", ascX)
+          .attr("y", ascY + 30)
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "middle")
+          .attr("fill", "#A855F7")
+          .attr("font-size", "12px")
+          .attr("font-weight", "bold")
+          .attr("font-family", "Arial, sans-serif")
+          .text(ascSignName);
       }
     }
   };
 
   useEffect(() => {
+    // ... (rest of the code remains the same)
     if (birthChartData && svgRef.current) {
       // Extract the simple zodiac data from the complex birth chart object
       const zodiacDataForWheel = {
@@ -1087,7 +1202,8 @@ const BirthChartPage: React.FC = () => {
           {/* Professional Cosmic Wheel */}
           <div className="flex justify-center">
             <div className="bg-gradient-to-br from-slate-900/50 to-indigo-900/50 backdrop-blur-sm rounded-3xl p-8 border border-white/10 shadow-2xl">
-              <h2 className="text-2xl font-bold text-white mb-6 text-center">Your Cosmic Wheel</h2>
+              <h2 className="text-2xl font-bold text-white mb-2 text-center">Your Personal Birth Chart</h2>
+              <p className="text-white/70 text-center mb-6">Cosmic wheel showing your Sun, Moon, and Ascendant placements</p>
               <div className="relative">
                 <svg
                   ref={svgRef}
@@ -1096,21 +1212,24 @@ const BirthChartPage: React.FC = () => {
                   viewBox="0 0 450 450"
                   className="w-full max-w-md rounded-2xl overflow-hidden"
                 />
-                {/* Legend */}
-                <div className="absolute -bottom-4 left-0 right-0 bg-black/80 backdrop-blur-sm rounded-lg p-3 border border-white/10">
+                {/* Enhanced Legend */}
+                <div className="absolute -bottom-4 left-0 right-0 bg-black/90 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                   <div className="flex justify-around text-xs">
                     <div className="flex items-center">
-                      <div className="w-3 h-3 bg-orange-400 rounded-full mr-2"></div>
-                      <span className="text-orange-300">Sun</span>
+                      <div className="w-3 h-3 bg-orange-400 rounded-full mr-2 animate-pulse"></div>
+                      <span className="text-orange-300 font-semibold">Your Sun</span>
                     </div>
                     <div className="flex items-center">
-                      <div className="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
-                      <span className="text-blue-300">Moon</span>
+                      <div className="w-3 h-3 bg-blue-400 rounded-full mr-2 animate-pulse"></div>
+                      <span className="text-blue-300 font-semibold">Your Moon</span>
                     </div>
                     <div className="flex items-center">
-                      <div className="w-3 h-3 bg-purple-400 rounded-full mr-2"></div>
-                      <span className="text-purple-300">Ascendant</span>
+                      <div className="w-3 h-3 bg-purple-400 rounded-full mr-2 animate-pulse"></div>
+                      <span className="text-purple-300 font-semibold">Your Ascendant</span>
                     </div>
+                  </div>
+                  <div className="text-center mt-2 text-white/60 text-xs">
+                    Highlighted segments show your personal zodiac signs
                   </div>
                 </div>
               </div>
