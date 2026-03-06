@@ -238,7 +238,12 @@ const getBirthChart = async (req, res, next) => {
 
     res.json({
       success: true,
-      birthChart
+      birthChart,
+      // Add individual zodiac fields for easy frontend access
+      sunSign: profile.birth_chart_data?.sun_sign || birthChart.enhanced_birth_chart_data?.sun_sign?.sign || 'Leo',
+      moonSign: profile.birth_chart_data?.moon_sign || birthChart.enhanced_birth_chart_data?.moon_sign?.sign || 'Taurus',
+      ascendant: profile.birth_chart_data?.ascendant || birthChart.enhanced_birth_chart_data?.ascendant?.sign || 'Leo',
+      dominantPlanet: profile.birth_chart_data?.dominant_planet || birthChart.enhanced_birth_chart_data?.dominant_planet?.planet || 'Sun'
     });
 
   } catch (error) {
