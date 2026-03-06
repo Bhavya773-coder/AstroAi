@@ -9,7 +9,11 @@ class LLMService {
 
   async callLLM(prompt) {
     try {
-      // Use minimal Ollama API format to avoid 400 errors
+      console.log('Calling Ollama with model:', this.modelName);
+      console.log('Endpoint:', this.modelEndpoint);
+      console.log('Prompt:', prompt);
+      
+      // Use Ollama API format with correct model name
       const response = await axios.post(this.modelEndpoint, {
         model: this.modelName,
         prompt: prompt,
@@ -36,6 +40,8 @@ class LLMService {
         };
       }
 
+      // Log the actual response structure for debugging
+      console.log('Response structure:', Object.keys(response.data || {}));
       throw new Error('Invalid response from Ollama - missing response field');
 
     } catch (error) {
