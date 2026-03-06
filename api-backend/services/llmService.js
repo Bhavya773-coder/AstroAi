@@ -9,17 +9,19 @@ class LLMService {
 
   async callLLM(prompt) {
     try {
-      // Use Ollama API format
+      // Use Ollama API format with correct parameters
       const response = await axios.post(this.modelEndpoint, {
         model: this.modelName,
         prompt: prompt,
         stream: false,
         options: {
           temperature: 0.7,
-          num_predict: 2000
+          num_predict: 2000,
+          top_p: 0.9,
+          repeat_penalty: 1.1
         }
       }, {
-        timeout: 30000, // Increased timeout for larger models
+        timeout: 60000, // Increased timeout for 65GB model
         headers: {
           'Content-Type': 'application/json'
         }
@@ -37,10 +39,19 @@ class LLMService {
         };
       }
 
+      // Log the actual response for debugging
+      console.log('Ollama Response:', JSON.stringify(response.data, null, 2));
       throw new Error('Invalid response from Ollama');
 
     } catch (error) {
       console.error('LLM API Error:', error.message);
+      
+      // Log more details for debugging
+      if (error.response) {
+        console.error('Response Status:', error.response.status);
+        console.error('Response Data:', JSON.stringify(error.response.data, null, 2));
+      }
+      
       // If it's a connection error, provide a helpful message
       if (error.code === 'ECONNREFUSED') {
         console.error('LLM service is not running at', this.modelEndpoint);
