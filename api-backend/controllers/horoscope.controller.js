@@ -2,6 +2,11 @@ const llmService = require('../services/llmService');
 const Profile = require('../models/Profile');
 
 class HoroscopeController {
+  constructor() {
+    // Simple in-memory rate limiting to prevent spam
+    this.requestCache = new Map();
+  }
+
   // Simple, robust horoscope data that doesn't require AI
   static getSimpleHoroscope(zodiacSign, currentDate) {
     const horoscopes = {
@@ -228,11 +233,27 @@ class HoroscopeController {
 
   async getDailyHoroscope(req, res) {
     try {
+      const userId = req.user.userId;
+      const now = Date.now();
+      
+      // Simple rate limiting: prevent multiple requests within 30 seconds
+      const lastRequest = this.requestCache.get(userId);
+      if (lastRequest && (now - lastRequest) < 30000) {
+        console.log('Rate limiting user:', userId, 'Last request was', Math.round((now - lastRequest) / 1000), 'seconds ago');
+        return res.status(429).json({
+          success: false,
+          message: 'Please wait a moment before requesting another horoscope.'
+        });
+      }
+      
+      // Update last request time
+      this.requestCache.set(userId, now);
+      
       console.log('Fetching horoscope for user:', req.user);
-      console.log('User ID:', req.user.userId);
+      console.log('User ID:', userId);
       
       // Get user's profile to find their zodiac sign
-      const profile = await Profile.findOne({ user_id: req.user.userId });
+      const profile = await Profile.findOne({ user_id: userId });
       
       console.log('Found profile:', profile ? 'Yes' : 'No');
       
