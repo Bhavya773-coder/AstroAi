@@ -292,15 +292,28 @@ const MainPage: React.FC = () => {
                     </div>
                     
                     {/* Advice */}
-                    <div className="text-center p-4 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-400/30 rounded-xl">
+                    <div className="text-center p-4 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-400/30 rounded-xl mb-4">
                       <div className="flex items-center justify-center mb-2">
                         <span className="text-yellow-300 text-2xl mr-2">{getProfessionalSymbol('💫')}</span>
                         <h4 className="text-yellow-300 font-semibold text-sm">Daily Guidance</h4>
                       </div>
                       <p className="text-white/95 text-sm leading-relaxed">
-                        {cleanAdviceText(horoscope.advice) || 'Trust your intuition today'}
+                        {horoscope.advice || 'Trust your intuition today'}
                       </p>
                     </div>
+
+                    {/* Warning */}
+                    {horoscope.warning && (
+                      <div className="text-center p-4 bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-400/30 rounded-xl">
+                        <div className="flex items-center justify-center mb-2">
+                          <span className="text-red-300 text-2xl mr-2">{getProfessionalSymbol('⚠️')}</span>
+                          <h4 className="text-red-300 font-semibold text-sm">Important Warning</h4>
+                        </div>
+                        <p className="text-white/95 text-sm leading-relaxed">
+                          {horoscope.warning}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="bg-black/30 rounded-xl p-6 text-center">
