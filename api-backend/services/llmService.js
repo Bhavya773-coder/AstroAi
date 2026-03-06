@@ -9,23 +9,20 @@ class LLMService {
 
   async callLLM(prompt) {
     try {
-      // Use Ollama API format with correct parameters
+      // Use minimal Ollama API format to avoid 400 errors
       const response = await axios.post(this.modelEndpoint, {
         model: this.modelName,
         prompt: prompt,
-        stream: false,
-        options: {
-          temperature: 0.7,
-          num_predict: 2000,
-          top_p: 0.9,
-          repeat_penalty: 1.1
-        }
+        stream: false
       }, {
         timeout: 60000, // Increased timeout for 65GB model
         headers: {
           'Content-Type': 'application/json'
         }
       });
+
+      console.log('Ollama Response Status:', response.status);
+      console.log('Ollama Response Data:', JSON.stringify(response.data, null, 2));
 
       // Ollama returns response in a different format
       if (response.data && response.data.response) {
@@ -39,9 +36,7 @@ class LLMService {
         };
       }
 
-      // Log the actual response for debugging
-      console.log('Ollama Response:', JSON.stringify(response.data, null, 2));
-      throw new Error('Invalid response from Ollama');
+      throw new Error('Invalid response from Ollama - missing response field');
 
     } catch (error) {
       console.error('LLM API Error:', error.message);
@@ -50,6 +45,7 @@ class LLMService {
       if (error.response) {
         console.error('Response Status:', error.response.status);
         console.error('Response Data:', JSON.stringify(error.response.data, null, 2));
+        console.error('Response Headers:', JSON.stringify(error.response.headers, null, 2));
       }
       
       // If it's a connection error, provide a helpful message
