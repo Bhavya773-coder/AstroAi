@@ -9,6 +9,16 @@ interface BirthChartData {
   moon_sign: string;
   ascendant: string;
   dominant_planet: string;
+  enhanced_birth_chart_data?: {
+    sun_sign: { sign: string; element: string; quality: string; ruler: string; description: string };
+    moon_sign: { sign: string; element: string; quality: string; ruler: string; description: string };
+    ascendant: { sign: string; element: string; quality: string; ruler: string; description: string };
+    dominant_planet: { planet: string; sign: string; element: string; description: string };
+  };
+  detailed_analysis?: any;
+  planetary_positions?: any;
+  aspects?: any;
+  houses?: any;
 }
 
 interface ZodiacSign {
@@ -619,10 +629,26 @@ const BirthChartPage: React.FC = () => {
 
     // Draw user's planets based on their birth chart data
     if (data) {
+      // Extract zodiac signs from data - handle both string and object formats
+      const getSignFromData = (signData: string | any): string => {
+        if (typeof signData === 'string') return signData;
+        if (signData && typeof signData === 'object') {
+          return signData.sign || signData.planet || 'Unknown';
+        }
+        return 'Unknown';
+      };
+
+      const sunSignName = getSignFromData(data.sun_sign);
+      const moonSignName = getSignFromData(data.moon_sign);
+      const ascSignName = getSignFromData(data.ascendant);
+
       // Get positions for user's signs
-      const sunSignData = zodiacSignsData.find(s => s.sign === data.sun_sign);
-      const moonSignData = zodiacSignsData.find(s => s.sign === data.moon_sign);
-      const ascSignData = zodiacSignsData.find(s => s.sign === data.ascendant);
+      const sunSignData = zodiacSignsData.find(s => s.sign === sunSignName);
+      const moonSignData = zodiacSignsData.find(s => s.sign === moonSignName);
+      const ascSignData = zodiacSignsData.find(s => s.sign === ascSignName);
+
+      console.log('Drawing cosmic wheel with signs:', { sunSignName, moonSignName, ascSignName });
+      console.log('Found sign data:', { sunSignData, moonSignData, ascSignData });
 
       // Draw Sun with professional styling
       if (sunSignData) {
@@ -745,9 +771,26 @@ const BirthChartPage: React.FC = () => {
 
   useEffect(() => {
     if (birthChartData && svgRef.current) {
-      drawCosmicWheel(birthChartData);
+      // Extract the simple zodiac data from the complex birth chart object
+      const zodiacDataForWheel = {
+        sun_sign: birthChartData.enhanced_birth_chart_data?.sun_sign?.sign || 
+                  birthChartData.sun_sign || 
+                  zodiacData.sunSign,
+        moon_sign: birthChartData.enhanced_birth_chart_data?.moon_sign?.sign || 
+                   birthChartData.moon_sign || 
+                   zodiacData.moonSign,
+        ascendant: birthChartData.enhanced_birth_chart_data?.ascendant?.sign || 
+                  birthChartData.ascendant || 
+                  zodiacData.ascendant,
+        dominant_planet: birthChartData.enhanced_birth_chart_data?.dominant_planet?.planet || 
+                        birthChartData.dominant_planet || 
+                        zodiacData.dominantPlanet
+      };
+      
+      console.log('Drawing cosmic wheel with zodiac data:', zodiacDataForWheel);
+      drawCosmicWheel(zodiacDataForWheel);
     }
-  }, [birthChartData]);
+  }, [birthChartData, zodiacData]);
 
   const handleCompleteGettingStarted = () => {
     navigate('/onboarding/step-1');
@@ -1040,7 +1083,7 @@ const BirthChartPage: React.FC = () => {
         )}
 
         {/* Birth Chart Data Display */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="space-y-8">
           {/* Professional Cosmic Wheel */}
           <div className="flex justify-center">
             <div className="bg-gradient-to-br from-slate-900/50 to-indigo-900/50 backdrop-blur-sm rounded-3xl p-8 border border-white/10 shadow-2xl">
@@ -1075,10 +1118,10 @@ const BirthChartPage: React.FC = () => {
           </div>
 
           {/* Detailed Zodiac Information */}
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {/* Sun Sign Details */}
             {isLoadingZodiac ? (
-              <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/10">
+              <div className="lg:col-span-2 xl:col-span-3 bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/10">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
                   <p className="text-white text-lg">Loading your zodiac insights...</p>
@@ -1087,228 +1130,119 @@ const BirthChartPage: React.FC = () => {
             ) : (
               <>
                 {sunSignInfo && (
-              <div className="bg-gradient-to-br from-orange-500/10 to-yellow-500/10 border border-orange-400/30 rounded-3xl p-6 backdrop-blur-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="text-orange-300 text-sm font-medium uppercase tracking-wider">Sun Sign</div>
-                  <div className="flex items-center">
-                    <div className="w-16 h-16 bg-orange-400/20 rounded-full flex items-center justify-center mr-4">
-                      <span className="text-orange-400 text-2xl">{sunSignInfo.symbol}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-3xl font-bold text-orange-300 mb-1">{sunSignInfo.sign}</div>
-                      <div className="text-sm text-orange-200">
-                        <span className="font-medium">Element:</span> {sunSignInfo.element} | 
-                        <span className="font-medium">Quality:</span> {sunSignInfo.quality}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <p className="text-white/80 leading-relaxed mb-6">{sunSignInfo.description}</p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <h4 className="text-orange-300 font-semibold mb-3 flex items-center">
-                        <span className="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
-                        Key Traits
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {sunSignInfo.traits.map((trait, index) => (
-                          <span key={index} className="px-3 py-1 bg-orange-400/20 rounded text-xs text-orange-200">
-                            {trait}
-                          </span>
-                        ))}
+                  <div className="bg-gradient-to-br from-orange-500/10 to-yellow-500/10 border border-orange-400/30 rounded-3xl p-6 backdrop-blur-sm hover:from-orange-500/20 hover:to-yellow-500/20 transition-all duration-300">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-orange-300 text-sm font-medium uppercase tracking-wider">Sun Sign</div>
+                      <div className="flex items-center">
+                        <div className="w-12 h-12 bg-orange-400/20 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-orange-400 text-xl">{sunSignInfo.symbol}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-orange-300">{sunSignInfo.sign}</div>
+                          <div className="text-xs text-orange-200">
+                            <span className="font-medium">Element:</span> {sunSignInfo.element} | 
+                            <span className="font-medium"> Quality:</span> {sunSignInfo.quality}
+                          </div>
+                        </div>
                       </div>
                     </div>
                     
-                    <div>
-                      <h4 className="text-orange-300 font-semibold mb-3 flex items-center">
-                        <span className="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
-                        Strengths
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {sunSignInfo.strengths.map((strength, index) => (
-                          <span key={index} className="px-3 py-1 bg-orange-400/20 rounded text-xs text-orange-200">
-                            {strength}
-                          </span>
-                        ))}
+                    <p className="text-white/80 leading-relaxed mb-4 text-sm">{sunSignInfo.description}</p>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="text-orange-300 font-semibold mb-2 text-sm flex items-center">
+                          <span className="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
+                          Key Traits
+                        </h4>
+                        <div className="flex flex-wrap gap-1">
+                          {sunSignInfo.traits?.slice(0, 4).map((trait, index) => (
+                            <span key={index} className="px-2 py-1 bg-orange-400/20 rounded text-xs text-orange-200">
+                              {trait}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                      <h4 className="text-orange-300 font-semibold mb-3 text-sm">Lucky Numbers</h4>
-                      <div className="flex gap-2">
-                        {sunSignInfo.lucky_numbers.map((num, index) => (
-                          <span key={index} className="px-3 py-1 bg-orange-400/20 rounded text-lg text-orange-200">
-                            {num}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-orange-300 font-semibold mb-3 text-sm">Lucky Colors</h4>
-                      <div className="flex gap-2">
-                        {sunSignInfo.lucky_colors.map((color, index) => (
-                          <span key={index} className="px-3 py-1 bg-orange-400/20 rounded text-xs text-orange-200">
-                            {color}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-orange-300 font-semibold mb-3 text-sm">Mantra</h4>
-                      <p className="text-orange-200 italic text-sm">"{sunSignInfo.mantra}"</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+                )}
 
-            {/* Moon Sign Details */}
-            {moonSignInfo && (
-              <div className="bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-400/30 rounded-3xl p-6 backdrop-blur-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="text-blue-300 text-sm font-medium uppercase tracking-wider">Moon Sign</div>
-                  <div className="flex items-center">
-                    <div className="w-16 h-16 bg-blue-400/20 rounded-full flex items-center justify-center mr-4">
-                      <span className="text-blue-400 text-2xl">{moonSignInfo.symbol}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-3xl font-bold text-blue-300 mb-1">{moonSignInfo.sign}</div>
-                      <div className="text-sm text-blue-200">
-                        <span className="font-medium">Element:</span> {moonSignInfo.element} | 
-                        <span className="font-medium">Quality:</span> {moonSignInfo.quality}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <p className="text-white/80 leading-relaxed mb-6">{moonSignInfo.description}</p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <h4 className="text-blue-300 font-semibold mb-3 flex items-center">
-                        <span className="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
-                        Emotional Traits
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {moonSignInfo.traits.map((trait, index) => (
-                          <span key={index} className="px-3 py-1 bg-blue-400/20 rounded text-xs text-blue-200">
-                            {trait}
-                          </span>
-                        ))}
+                {moonSignInfo && (
+                  <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-400/30 rounded-3xl p-6 backdrop-blur-sm hover:from-blue-500/20 hover:to-cyan-500/20 transition-all duration-300">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-blue-300 text-sm font-medium uppercase tracking-wider">Moon Sign</div>
+                      <div className="flex items-center">
+                        <div className="w-12 h-12 bg-blue-400/20 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-blue-400 text-xl">{moonSignInfo.symbol}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-blue-300">{moonSignInfo.sign}</div>
+                          <div className="text-xs text-blue-200">
+                            <span className="font-medium">Element:</span> {moonSignInfo.element} | 
+                            <span className="font-medium"> Quality:</span> {moonSignInfo.quality}
+                          </div>
+                        </div>
                       </div>
                     </div>
                     
-                    <div>
-                      <h4 className="text-blue-300 font-semibold mb-3 flex items-center">
-                        <span className="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
-                        Challenges
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {moonSignInfo.challenges.map((challenge, index) => (
-                          <span key={index} className="px-3 py-1 bg-blue-400/20 rounded text-xs text-blue-200">
-                            {challenge}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="text-blue-300 font-semibold mb-3 text-sm">Career Suitability</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {moonSignInfo.career_suitability.map((career, index) => (
-                          <span key={index} className="px-3 py-1 bg-blue-400/20 rounded text-xs text-blue-200">
-                            {career}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                    <p className="text-white/80 leading-relaxed mb-4 text-sm">{moonSignInfo.description}</p>
                     
-                    <div>
-                      <h4 className="text-blue-300 font-semibold mb-3 text-sm">Love Compatibility</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {moonSignInfo.love_compatibility.map((sign, index) => (
-                          <span key={index} className="px-3 py-1 bg-blue-400/20 rounded text-xs text-blue-200">
-                            {sign}
-                          </span>
-                        ))}
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="text-blue-300 font-semibold mb-2 text-sm flex items-center">
+                          <span className="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
+                          Emotional Traits
+                        </h4>
+                        <div className="flex flex-wrap gap-1">
+                          {moonSignInfo.traits?.slice(0, 4).map((trait, index) => (
+                            <span key={index} className="px-2 py-1 bg-blue-400/20 rounded text-xs text-blue-200">
+                              {trait}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
-            </>
-            )}
-            
-            {/* Ascendant Details */}
-            {ascendantInfo && (
-              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-400/30 rounded-3xl p-6 backdrop-blur-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="text-purple-300 text-sm font-medium uppercase tracking-wider">Ascendant</div>
-                  <div className="flex items-center">
-                    <div className="w-16 h-16 bg-purple-400/20 rounded-full flex items-center justify-center mr-4">
-                      <span className="text-purple-400 text-2xl">{ascendantInfo.symbol}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-3xl font-bold text-purple-300 mb-1">{ascendantInfo.sign}</div>
-                      <div className="text-sm text-purple-200">
-                        <span className="font-medium">Element:</span> {ascendantInfo.element} | 
-                        <span className="font-medium">Quality:</span> {ascendantInfo.quality}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <p className="text-white/80 leading-relaxed mb-6">{ascendantInfo.description}</p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <h4 className="text-purple-300 font-semibold mb-3 flex items-center">
-                        <span className="w-2 h-2 bg-purple-400 rounded-full mr-2"></span>
-                        How Others See You
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {ascendantInfo.traits.slice(0, 4).map((trait, index) => (
-                          <span key={index} className="px-3 py-1 bg-purple-400/20 rounded text-xs text-purple-200">
-                            {trait}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-purple-300 font-semibold mb-3 flex items-center">
-                        <span className="w-2 h-2 bg-purple-400 rounded-full mr-2"></span>
-                        Elemental Influence
-                      </h4>
-                      <p className="text-purple-200 text-sm leading-relaxed">{ascendantInfo.elemental_traits}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+                )}
 
-            {/* Dominant Planet */}
-            {birthChartData.dominant_planet && (
-              <div className="bg-gradient-to-br from-pink-500/10 to-rose-500/10 border border-pink-400/30 rounded-3xl p-6 backdrop-blur-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="text-pink-300 text-sm font-medium uppercase tracking-wider">Dominant Planet</div>
-                  <div className="flex items-center">
-                    <div className="w-16 h-16 bg-pink-400/20 rounded-full flex items-center justify-center mr-4">
-                      <span className="text-pink-400 text-2xl">🪐</span>
+                {ascendantInfo && (
+                  <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-400/30 rounded-3xl p-6 backdrop-blur-sm hover:from-purple-500/20 hover:to-pink-500/20 transition-all duration-300 lg:col-span-2 xl:col-span-1">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-purple-300 text-sm font-medium uppercase tracking-wider">Ascendant</div>
+                      <div className="flex items-center">
+                        <div className="w-12 h-12 bg-purple-400/20 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-purple-400 text-xl">{ascendantInfo.symbol}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-purple-300">{ascendantInfo.sign}</div>
+                          <div className="text-xs text-purple-200">
+                            <span className="font-medium">Element:</span> {ascendantInfo.element} | 
+                            <span className="font-medium"> Quality:</span> {ascendantInfo.quality}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-3xl font-bold text-pink-300 mb-1">{birthChartData.dominant_planet}</div>
-                      <p className="text-pink-200 text-sm">Your ruling planetary influence</p>
+                    
+                    <p className="text-white/80 leading-relaxed mb-4 text-sm">{ascendantInfo.description}</p>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="text-purple-300 font-semibold mb-2 text-sm flex items-center">
+                          <span className="w-2 h-2 bg-purple-400 rounded-full mr-2"></span>
+                          Social Traits
+                        </h4>
+                        <div className="flex flex-wrap gap-1">
+                          {ascendantInfo.traits?.slice(0, 4).map((trait, index) => (
+                            <span key={index} className="px-2 py-1 bg-purple-400/20 rounded text-xs text-purple-200">
+                              {trait}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
+                )}
+              </>
             )}
           </div>
         </div>
