@@ -4,6 +4,96 @@ import { apiFetch } from '../api/client';
 import * as d3 from 'd3';
 import AppNavbar from './AppNavbar';
 
+// Helper functions for zodiac characteristics
+const getSunSignTraits = (sign: string): string => {
+  const traits: { [key: string]: string } = {
+    'Aries': 'Natural leader with boundless energy and courage. You pioneer new ideas and inspire others with your enthusiasm.',
+    'Taurus': 'Reliable and patient with strong determination. You value security and build lasting foundations.',
+    'Gemini': 'Versatile and curious with excellent communication skills. You adapt quickly and love learning.',
+    'Cancer': 'Nurturing and intuitive with deep emotional intelligence. You protect and care for others.',
+    'Leo': 'Confident and charismatic with natural leadership qualities. You shine brightly and inspire loyalty.',
+    'Virgo': 'Analytical and practical with attention to detail. You serve others through your precision.',
+    'Libra': 'Diplomatic and fair-minded with strong aesthetic sense. You create harmony and balance.',
+    'Scorpio': 'Intense and transformative with deep perception. You uncover truths and embrace change.',
+    'Sagittarius': 'Adventurous and optimistic with philosophical outlook. You seek truth and expand horizons.',
+    'Capricorn': 'Ambitious and disciplined with strong work ethic. You build lasting success.',
+    'Aquarius': 'Innovative and humanitarian with progressive thinking. You envision better futures.',
+    'Pisces': 'Compassionate and artistic with deep intuition. You bridge the material and spiritual worlds.'
+  };
+  return traits[sign] || 'Unique individual with special qualities.';
+};
+
+const getMoonSignTraits = (sign: string): string => {
+  const traits: { [key: string]: string } = {
+    'Aries': 'Emotional reactions are quick and passionate. You express feelings directly and courageously.',
+    'Taurus': 'Emotions are stable and deeply felt. You seek comfort and security in relationships.',
+    'Gemini': 'Emotions are expressed through communication. You need mental stimulation and variety.',
+    'Cancer': 'Highly sensitive and nurturing emotionally. You protect loved ones fiercely.',
+    'Leo': 'Emotions are dramatic and expressive. You need recognition and affection.',
+    'Virgo': 'Emotions are practical and service-oriented. You show care through helpful actions.',
+    'Libra': 'Emotions seek harmony and balance. You need peace and fair treatment.',
+    'Scorpio': 'Emotions are intense and transformative. You feel deeply and seek profound connections.',
+    'Sagittarius': 'Emotions are optimistic and freedom-loving. You need adventure and philosophical understanding.',
+    'Capricorn': 'Emotions are controlled and responsible. You show care through stability.',
+    'Aquarius': 'Emotions are intellectual and detached. You need friendship and humanitarian causes.',
+    'Pisces': 'Emotions are empathic and intuitive. You absorb others\' feelings and need compassion.'
+  };
+  return traits[sign] || 'Emotionally intuitive and responsive.';
+};
+
+const getAscendantTraits = (sign: string): string => {
+  const traits: { [key: string]: string } = {
+    'Aries': 'Others see you as energetic and confident. You make a strong first impression.',
+    'Taurus': 'Others see you as reliable and calm. You project stability and dependability.',
+    'Gemini': 'Others see you as witty and adaptable. You appear curious and communicative.',
+    'Cancer': 'Others see you as nurturing and protective. You appear caring and approachable.',
+    'Leo': 'Others see you as charismatic and confident. You command attention naturally.',
+    'Virgo': 'Others see you as helpful and precise. You appear organized and competent.',
+    'Libra': 'Others see you as charming and diplomatic. You appear fair and socially graceful.',
+    'Scorpio': 'Others see you as intense and mysterious. You project depth and magnetism.',
+    'Sagittarius': 'Others see you as optimistic and adventurous. You appear enthusiastic and philosophical.',
+    'Capricorn': 'Others see you as serious and capable. You project responsibility and authority.',
+    'Aquarius': 'Others see you as unique and intellectual. You appear innovative and friendly.',
+    'Pisces': 'Others see you as gentle and intuitive. You appear compassionate and artistic.'
+  };
+  return traits[sign] || 'Others see you as unique and memorable.';
+};
+
+const getOverallCharacteristics = (sun: string, moon: string, asc: string): string => {
+  const combinations: { [key: string]: string } = {
+    'Leo-Leo-Leo': 'Triple Leo energy makes you a natural superstar with immense charisma and leadership presence.',
+    'Taurus-Taurus-Taurus': 'Triple Taurus gives you incredible stability, determination, and appreciation for beauty.',
+    'Gemini-Gemini-Gemini': 'Triple Gemini makes you exceptionally versatile, communicative, and intellectually curious.',
+    // Add more combinations as needed
+  };
+  
+  const key = `${sun}-${moon}-${asc}`;
+  if (combinations[key]) {
+    return combinations[key];
+  }
+  
+  // Default combination analysis
+  return `Your ${sun} core drives you to ${getSunSignTraits(sun).split('.')[0].toLowerCase()}, 
+  while your ${moon} moon means you ${getMoonSignTraits(moon).split('.')[0].toLowerCase()}. 
+  Others see you as ${getAscendantTraits(asc).split('.')[0].toLowerCase()}, 
+  creating a fascinating blend of energies that makes you uniquely you.`;
+};
+
+const getElementCount = (sun: string, moon: string, asc: string, element: string): number => {
+  const elements: { [key: string]: string } = {
+    'Aries': 'Fire', 'Leo': 'Fire', 'Sagittarius': 'Fire',
+    'Taurus': 'Earth', 'Virgo': 'Earth', 'Capricorn': 'Earth',
+    'Gemini': 'Air', 'Libra': 'Air', 'Aquarius': 'Air',
+    'Cancer': 'Water', 'Scorpio': 'Water', 'Pisces': 'Water'
+  };
+  
+  let count = 0;
+  if (elements[sun] === element) count++;
+  if (elements[moon] === element) count++;
+  if (elements[asc] === element) count++;
+  return count;
+};
+
 interface BirthChartData {
   sun_sign: string;
   moon_sign: string;
@@ -1049,6 +1139,86 @@ const BirthChartPage: React.FC = () => {
 
         {/* Birth Chart Data Display */}
         <div className="space-y-8">
+          {/* Zodiac Characteristics Overview */}
+          {zodiacData.sunSign && zodiacData.moonSign && zodiacData.ascendant && (
+            <div className="bg-gradient-to-br from-purple-500/10 via-indigo-500/10 to-blue-500/10 border border-purple-400/30 rounded-3xl p-8 backdrop-blur-sm">
+              <h2 className="text-2xl font-bold text-white mb-6 text-center flex items-center justify-center">
+                <span className="text-3xl mr-3">✨</span>
+                Your Cosmic Characteristics
+                <span className="text-3xl ml-3">✨</span>
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {/* Sun Sign Core Identity */}
+                <div className="text-center">
+                  <div className="text-4xl mb-2">{zodiacIcons[zodiacData.sunSign] || '☉'}</div>
+                  <h3 className="text-xl font-bold text-orange-300 mb-2">{zodiacData.sunSign} Sun</h3>
+                  <p className="text-orange-200 text-sm mb-3">Core Identity & Ego</p>
+                  <div className="text-white/80 text-sm leading-relaxed">
+                    {getSunSignTraits(zodiacData.sunSign)}
+                  </div>
+                </div>
+
+                {/* Moon Sign Emotional Nature */}
+                <div className="text-center">
+                  <div className="text-4xl mb-2">{zodiacIcons[zodiacData.moonSign] || '☽'}</div>
+                  <h3 className="text-xl font-bold text-blue-300 mb-2">{zodiacData.moonSign} Moon</h3>
+                  <p className="text-blue-200 text-sm mb-3">Emotional Nature</p>
+                  <div className="text-white/80 text-sm leading-relaxed">
+                    {getMoonSignTraits(zodiacData.moonSign)}
+                  </div>
+                </div>
+
+                {/* Ascendant Social Mask */}
+                <div className="text-center">
+                  <div className="text-4xl mb-2">{zodiacIcons[zodiacData.ascendant] || '⬆'}</div>
+                  <h3 className="text-xl font-bold text-purple-300 mb-2">{zodiacData.ascendant} Rising</h3>
+                  <p className="text-purple-200 text-sm mb-3">Social Personality</p>
+                  <div className="text-white/80 text-sm leading-relaxed">
+                    {getAscendantTraits(zodiacData.ascendant)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Overall Characteristics Summary */}
+              <div className="bg-black/30 rounded-2xl p-6 border border-white/10">
+                <h3 className="text-lg font-bold text-white mb-4 text-center">Your Cosmic Personality Blend</h3>
+                <div className="text-white/90 leading-relaxed text-center">
+                  <p className="mb-4">
+                    As a <span className="text-orange-300 font-semibold">{zodiacData.sunSign}</span> with a <span className="text-blue-300 font-semibold">{zodiacData.moonSign}</span> moon and <span className="text-purple-300 font-semibold">{zodiacData.ascendant}</span> rising, 
+                    you embody a unique cosmic blend of energies.
+                  </p>
+                  <p className="text-sm">
+                    {getOverallCharacteristics(zodiacData.sunSign, zodiacData.moonSign, zodiacData.ascendant)}
+                  </p>
+                </div>
+                
+                {/* Element Balance */}
+                <div className="mt-6 pt-6 border-t border-white/10">
+                  <h4 className="text-md font-semibold text-white mb-3 text-center">Elemental Balance</h4>
+                  <div className="flex justify-center space-x-4 text-xs">
+                    <div className="text-center">
+                      <div className="text-orange-400 font-bold">{getElementCount(zodiacData.sunSign, zodiacData.moonSign, zodiacData.ascendant, 'Fire')}</div>
+                      <div className="text-white/70">Fire</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-green-400 font-bold">{getElementCount(zodiacData.sunSign, zodiacData.moonSign, zodiacData.ascendant, 'Earth')}</div>
+                      <div className="text-white/70">Earth</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-blue-400 font-bold">{getElementCount(zodiacData.sunSign, zodiacData.moonSign, zodiacData.ascendant, 'Air')}</div>
+                      <div className="text-white/70">Air</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-cyan-400 font-bold">{getElementCount(zodiacData.sunSign, zodiacData.moonSign, zodiacData.ascendant, 'Water')}</div>
+                      <div className="text-white/70">Water</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Professional Astrological Birth Chart */}
           <div className="flex justify-center">
             <div className="bg-gradient-to-br from-slate-900/50 to-indigo-900/50 backdrop-blur-sm rounded-3xl p-8 border border-white/10 shadow-2xl">
