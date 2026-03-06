@@ -233,60 +233,72 @@ const MainPage: React.FC = () => {
                     <p className="text-white/60">Generating your cosmic insights...</p>
                   </div>
                 ) : horoscope ? (
-                  <div className="bg-black/30 rounded-xl p-6 mb-4">
-                    <div className="text-center mb-4">
-                      <div className="text-4xl mb-3 text-yellow-300">{getProfessionalSymbol('✨')}</div>
-                      <h4 className="text-lg font-semibold text-yellow-300 mb-2">
+                  <div className="bg-gradient-to-br from-indigo-900/50 to-purple-900/50 border border-purple-400/30 rounded-2xl p-8 mb-4 backdrop-blur-sm shadow-xl">
+                    <div className="text-center mb-6">
+                      <div className="text-5xl mb-4 text-yellow-300">{getProfessionalSymbol('✨')}</div>
+                      <h4 className="text-2xl font-bold text-yellow-300 mb-3">
                         {horoscope.overall_theme || 'Cosmic Energy'}
                       </h4>
-                      <p className="text-white/80 text-sm mb-4">
+                      <p className="text-white/80 text-base mb-2">
                         {horoscope.date || getCurrentDate()}
                       </p>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="text-purple-300 font-medium">Zodiac:</span>
+                        <span className="text-purple-200 font-semibold">{horoscope.zodiac_sign || 'Loading...'}</span>
+                      </div>
                     </div>
                     
                     {/* Key Areas Grid */}
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="text-center p-3 bg-white/5 rounded-lg">
-                        <div className="text-pink-300 text-sm mb-1">{getProfessionalSymbol('❤️')} Love</div>
-                        <p className="text-white/80 text-xs">{horoscope.key_areas?.love || 'Focus on connections'}</p>
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="text-center p-4 bg-gradient-to-br from-pink-500/10 to-rose-500/10 border border-pink-400/30 rounded-xl hover:border-pink-400/50 transition-all duration-300">
+                        <div className="text-pink-300 text-lg mb-2">{getProfessionalSymbol('❤️')}</div>
+                        <h5 className="text-pink-300 font-semibold text-sm mb-2">Love</h5>
+                        <p className="text-white/90 text-sm leading-relaxed">{horoscope.key_areas?.love || 'Focus on connections'}</p>
                       </div>
-                      <div className="text-center p-3 bg-white/5 rounded-lg">
-                        <div className="text-green-300 text-sm mb-1">{getProfessionalSymbol('💼')} Career</div>
-                        <p className="text-white/80 text-xs">{horoscope.key_areas?.career || 'Professional growth'}</p>
+                      <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-400/30 rounded-xl hover:border-green-400/50 transition-all duration-300">
+                        <div className="text-green-300 text-lg mb-2">{getProfessionalSymbol('💼')}</div>
+                        <h5 className="text-green-300 font-semibold text-sm mb-2">Career</h5>
+                        <p className="text-white/90 text-sm leading-relaxed">{horoscope.key_areas?.career || 'Professional growth'}</p>
                       </div>
-                      <div className="text-center p-3 bg-white/5 rounded-lg">
-                        <div className="text-blue-300 text-sm mb-1">{getProfessionalSymbol('🏥')} Health</div>
-                        <p className="text-white/80 text-xs">{horoscope.key_areas?.health || 'Wellness focus'}</p>
+                      <div className="text-center p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-400/30 rounded-xl hover:border-blue-400/50 transition-all duration-300">
+                        <div className="text-blue-300 text-lg mb-2">{getProfessionalSymbol('🏥')}</div>
+                        <h5 className="text-blue-300 font-semibold text-sm mb-2">Health</h5>
+                        <p className="text-white/90 text-sm leading-relaxed">{horoscope.key_areas?.health || 'Wellness focus'}</p>
                       </div>
-                      <div className="text-center p-3 bg-white/5 rounded-lg">
-                        <div className="text-yellow-300 text-sm mb-1">{getProfessionalSymbol('💰')} Finance</div>
-                        <p className="text-white/80 text-xs">{horoscope.key_areas?.finance || 'Financial stability'}</p>
+                      <div className="text-center p-4 bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border border-yellow-400/30 rounded-xl hover:border-yellow-400/50 transition-all duration-300">
+                        <div className="text-yellow-300 text-lg mb-2">{getProfessionalSymbol('💰')}</div>
+                        <h5 className="text-yellow-300 font-semibold text-sm mb-2">Finance</h5>
+                        <p className="text-white/90 text-sm leading-relaxed">{horoscope.key_areas?.finance || 'Financial stability'}</p>
                       </div>
                     </div>
                     
                     {/* Daily Stats */}
-                    <div className="grid grid-cols-3 gap-4 text-center mb-4">
-                      <div>
-                        <div className="text-2xl mb-1 text-yellow-300">{getProfessionalSymbol('🎯')}</div>
-                        <div className="text-sm text-white/70">Mood</div>
-                        <div className="text-lg font-bold text-purple-400">{horoscope.mood || 'Balanced'}</div>
+                    <div className="grid grid-cols-3 gap-4 text-center mb-6">
+                      <div className="p-4 bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border border-yellow-400/30 rounded-xl">
+                        <div className="text-3xl mb-2 text-yellow-300">{getProfessionalSymbol('🎯')}</div>
+                        <div className="text-sm text-white/70 mb-1">Mood</div>
+                        <div className="text-xl font-bold text-purple-400">{horoscope.mood || 'Balanced'}</div>
                       </div>
-                      <div>
-                        <div className="text-2xl mb-1 text-orange-400">{getProfessionalSymbol('⚡')}</div>
-                        <div className="text-sm text-white/70">Energy</div>
-                        <div className="text-lg font-bold text-orange-400">{horoscope.energy_level || 'Medium'}</div>
+                      <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-400/30 rounded-xl">
+                        <div className="text-3xl mb-2 text-orange-400">{getProfessionalSymbol('⚡')}</div>
+                        <div className="text-sm text-white/70 mb-1">Energy</div>
+                        <div className="text-xl font-bold text-orange-400">{horoscope.energy_level || 'Medium'}</div>
                       </div>
-                      <div>
-                        <div className="text-2xl mb-1 text-green-400">{getProfessionalSymbol('🍀')}</div>
-                        <div className="text-sm text-white/70">Lucky</div>
-                        <div className="text-lg font-bold text-green-400">{horoscope.lucky_number || 7}</div>
+                      <div className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-400/30 rounded-xl">
+                        <div className="text-3xl mb-2 text-green-400">{getProfessionalSymbol('🍀')}</div>
+                        <div className="text-sm text-white/70 mb-1">Lucky</div>
+                        <div className="text-xl font-bold text-green-400">{horoscope.lucky_number || 7}</div>
                       </div>
                     </div>
                     
                     {/* Advice */}
-                    <div className="text-center p-3 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-lg">
-                      <p className="text-white/90 text-sm italic">
-                        <span className="text-yellow-300">{getProfessionalSymbol('💫')}</span> {horoscope.advice || 'Trust your intuition today'}
+                    <div className="text-center p-4 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-400/30 rounded-xl">
+                      <div className="flex items-center justify-center mb-2">
+                        <span className="text-yellow-300 text-2xl mr-2">{getProfessionalSymbol('💫')}</span>
+                        <h4 className="text-yellow-300 font-semibold text-sm">Daily Guidance</h4>
+                      </div>
+                      <p className="text-white/95 text-sm leading-relaxed">
+                        {horoscope.advice || 'Trust your intuition today'}
                       </p>
                     </div>
                   </div>
@@ -304,7 +316,7 @@ const MainPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Quick Stats */}
+              {/* Quick Stats
               <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-400/30 rounded-2xl p-6 backdrop-blur-sm">
                 <h3 className="text-xl font-bold text-white mb-4">Your Cosmic Stats</h3>
                 <div className="space-y-4">
@@ -329,7 +341,7 @@ const MainPage: React.FC = () => {
                     <span className="text-yellow-300 font-bold">Gold</span>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Service Cards */}
