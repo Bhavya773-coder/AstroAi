@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const llmService = require('../services/llmService');
 const Message = require('../models/Message');
+const mongoose = require('mongoose');
 
 // GPT Chat endpoint
 router.post('/chat', auth.requireAuth, async (req, res) => {
@@ -19,7 +20,7 @@ router.post('/chat', auth.requireAuth, async (req, res) => {
     console.log(`GPT Chat request from user ${req.user.userId}:`, message);
 
     // Create a temporary conversation ID for GPT chat (could be enhanced later)
-    const conversationId = new require('mongoose').Types.ObjectId();
+    const conversationId = new mongoose.Types.ObjectId();
 
     // Store user message in database
     const userMessage = new Message({
