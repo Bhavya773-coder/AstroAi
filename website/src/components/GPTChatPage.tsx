@@ -12,7 +12,6 @@ interface GPTMessage {
 }
 
 const GPTChatPage: React.FC = () => {
-  const navigate = useNavigate();
   const [messages, setMessages] = useState<GPTMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -93,7 +92,7 @@ const GPTChatPage: React.FC = () => {
   };
 
   const clearChat = () => {
-    if (confirm('Are you sure you want to clear this conversation?')) {
+    if (window.confirm('Are you sure you want to clear this conversation?')) {
       setMessages([]);
     }
   };
