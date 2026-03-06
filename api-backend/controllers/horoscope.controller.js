@@ -2,6 +2,230 @@ const llmService = require('../services/llmService');
 const Profile = require('../models/Profile');
 
 class HoroscopeController {
+  // Simple, robust horoscope data that doesn't require AI
+  getSimpleHoroscope(zodiacSign, currentDate) {
+    const horoscopes = {
+      'Aries': {
+        overall_theme: 'Dynamic Energy',
+        mood: 'Energetic',
+        lucky_number: 9,
+        lucky_color: 'Red',
+        compatibility: { best_with: 'Leo', challenging_with: 'Cancer' },
+        key_areas: {
+          love: 'Your passion attracts others today. Be bold but considerate.',
+          career: 'New opportunities await. Take initiative on projects.',
+          health: 'High energy - channel it productively with exercise.',
+          finance: 'Good day for investments, but avoid impulse buys.'
+        },
+        advice: 'Your natural leadership shines today.',
+        warning: 'Avoid rushing into decisions without thinking.',
+        opportunity: 'A chance to lead a project could appear.',
+        energy_level: 'High',
+        lucky_time: 'Morning'
+      },
+      'Taurus': {
+        overall_theme: 'Steady Progress',
+        mood: 'Grounded',
+        lucky_number: 6,
+        lucky_color: 'Green',
+        compatibility: { best_with: 'Virgo', challenging_with: 'Aquarius' },
+        key_areas: {
+          love: 'Stability in relationships brings comfort.',
+          career: 'Consistent effort pays off. Stay focused.',
+          health: 'Take time for relaxation and self-care.',
+          finance: 'Financial planning brings security.'
+        },
+        advice: 'Patience is your greatest asset today.',
+        warning: 'Don\'t let stubbornness block progress.',
+        opportunity: 'A long-term project shows promise.',
+        energy_level: 'Medium',
+        lucky_time: 'Afternoon'
+      },
+      'Gemini': {
+        overall_theme: 'Social Connections',
+        mood: 'Curious',
+        lucky_number: 5,
+        lucky_color: 'Yellow',
+        compatibility: { best_with: 'Libra', challenging_with: 'Pisces' },
+        key_areas: {
+          love: 'Communication deepens bonds. Share your thoughts.',
+          career: 'Networking opens doors. Connect with colleagues.',
+          health: 'Mental stimulation needed. Learn something new.',
+          finance: 'Multiple income streams possible.'
+        },
+        advice: 'Your versatility is your strength.',
+        warning: 'Avoid spreading yourself too thin.',
+        opportunity: 'An unexpected conversation brings insight.',
+        energy_level: 'High',
+        lucky_time: 'Evening'
+      },
+      'Cancer': {
+        overall_theme: 'Emotional Harmony',
+        mood: 'Nurturing',
+        lucky_number: 2,
+        lucky_color: 'Silver',
+        compatibility: { best_with: 'Scorpio', challenging_with: 'Aries' },
+        key_areas: {
+          love: 'Home and family bring joy. Create comfort.',
+          career: 'Intuition guides decisions. Trust your gut.',
+          health: 'Emotional well-being is key. Practice self-care.',
+          finance: 'Security-focused decisions pay off.'
+        },
+        advice: 'Your empathy is a superpower.',
+        warning: 'Don\'t absorb others\' negative emotions.',
+        opportunity: 'A chance to help someone in need.',
+        energy_level: 'Medium',
+        lucky_time: 'Night'
+      },
+      'Leo': {
+        overall_theme: 'Creative Expression',
+        mood: 'Confident',
+        lucky_number: 1,
+        lucky_color: 'Gold',
+        compatibility: { best_with: 'Aries', challenging_with: 'Taurus' },
+        key_areas: {
+          love: 'Your charisma attracts admirers. Shine brightly.',
+          career: 'Leadership opportunities arise. Take charge.',
+          health: 'High energy needs creative outlet.',
+          finance: 'Bold investments may pay off.'
+        },
+        advice: 'Your confidence inspires others.',
+        warning: 'Avoid letting ego drive decisions.',
+        opportunity: 'A creative project gains recognition.',
+        energy_level: 'High',
+        lucky_time: 'Noon'
+      },
+      'Virgo': {
+        overall_theme: 'Practical Wisdom',
+        mood: 'Analytical',
+        lucky_number: 5,
+        lucky_color: 'Brown',
+        compatibility: { best_with: 'Taurus', challenging_with: 'Gemini' },
+        key_areas: {
+          love: 'Thoughtful gestures strengthen bonds.',
+          career: 'Attention to detail impresses superiors.',
+          health: 'Routine brings stability. Stay consistent.',
+          finance: 'Budgeting and planning bring rewards.'
+        },
+        advice: 'Your precision is valuable.',
+        warning: 'Don\'t overanalyze simple situations.',
+        opportunity: 'A problem-solving skill is needed.',
+        energy_level: 'Medium',
+        lucky_time: 'Morning'
+      },
+      'Libra': {
+        overall_theme: 'Balanced Harmony',
+        mood: 'Diplomatic',
+        lucky_number: 7,
+        lucky_color: 'Pink',
+        compatibility: { best_with: 'Gemini', challenging_with: 'Capricorn' },
+        key_areas: {
+          love: 'Partnership energy is strong. Compromise works.',
+          career: 'Collaboration brings success. Team up.',
+          health: 'Balance work and rest. Find equilibrium.',
+          finance: 'Fair dealings build trust.'
+        },
+        advice: 'Your sense of justice guides well.',
+        warning: 'Avoid indecision on important matters.',
+        opportunity: 'A mediation role could appear.',
+        energy_level: 'Medium',
+        lucky_time: 'Afternoon'
+      },
+      'Scorpio': {
+        overall_theme: 'Deep Transformation',
+        mood: 'Intense',
+        lucky_number: 8,
+        lucky_color: 'Black',
+        compatibility: { best_with: 'Cancer', challenging_with: 'Leo' },
+        key_areas: {
+          love: 'Passion deepens connections. Be authentic.',
+          career: 'Research uncovers hidden opportunities.',
+          health: 'Emotional release is healing. Let go.',
+          finance: 'Strategic investments grow wealth.'
+        },
+        advice: 'Your intensity is magnetic.',
+        warning: 'Avoid obsessive thinking patterns.',
+        opportunity: 'A revelation changes your perspective.',
+        energy_level: 'High',
+        lucky_time: 'Night'
+      },
+      'Sagittarius': {
+        overall_theme: 'Adventure Awaits',
+        mood: 'Optimistic',
+        lucky_number: 3,
+        lucky_color: 'Purple',
+        compatibility: { best_with: 'Aries', challenging_with: 'Virgo' },
+        key_areas: {
+          love: 'Adventure together strengthens bonds.',
+          career: 'New skills expand opportunities. Learn.',
+          health: 'Outdoor activities energize you.',
+          finance: 'Travel brings unexpected benefits.'
+        },
+        advice: 'Your optimism is contagious.',
+        warning: 'Don\'t overcommit to too many projects.',
+        opportunity: 'A learning opportunity appears.',
+        energy_level: 'High',
+        lucky_time: 'Morning'
+      },
+      'Capricorn': {
+        overall_theme: 'Ambitious Achievement',
+        mood: 'Disciplined',
+        lucky_number: 4,
+        lucky_color: 'Gray',
+        compatibility: { best_with: 'Taurus', challenging_with: 'Aries' },
+        key_areas: {
+          love: 'Commitment builds trust. Be reliable.',
+          career: 'Hard work brings recognition. Persist.',
+          health: 'Structure in routine supports wellness.',
+          finance: 'Long-term planning pays dividends.'
+        },
+        advice: 'Your ambition inspires respect.',
+        warning: 'Don\' neglect relationships for work.',
+        opportunity: 'A leadership position opens up.',
+        energy_level: 'Medium',
+        lucky_time: 'Afternoon'
+      },
+      'Aquarius': {
+        overall_theme: 'Innovative Thinking',
+        mood: 'Intellectual',
+        lucky_number: 11,
+        lucky_color: 'Blue',
+        compatibility: { best_with: 'Gemini', challenging_with: 'Scorpio' },
+        key_areas: {
+          love: 'Intellectual connection stimulates romance.',
+          career: 'Innovation sets you apart. Think differently.',
+          health: 'Mental stimulation prevents boredom.',
+          finance: 'Technology investments show promise.'
+        },
+        advice: 'Your uniqueness is your strength.',
+        warning: 'Don\'t detach from emotional needs.',
+        opportunity: 'A groundbreaking idea emerges.',
+        energy_level: 'High',
+        lucky_time: 'Evening'
+      },
+      'Pisces': {
+        overall_theme: 'Intuitive Flow',
+        mood: 'Dreamy',
+        lucky_number: 12,
+        lucky_color: 'Sea Green',
+        compatibility: { best_with: 'Cancer', challenging_with: 'Gemini' },
+        key_areas: {
+          love: 'Empathy deepens emotional bonds.',
+          career: 'Creativity solves problems. Trust inspiration.',
+          health: 'Mental health needs attention. Meditate.',
+          finance: 'Intuitive decisions about money work well.'
+        },
+        advice: 'Your compassion heals others.',
+        warning: 'Avoid escapism when facing reality.',
+        opportunity: 'A creative solution is needed.',
+        energy_level: 'Medium',
+        lucky_time: 'Night'
+      }
+    };
+
+    return horoscopes[zodiacSign] || horoscopes['Aries']; // Default to Aries if sign not found
+  }
+
   async getDailyHoroscope(req, res) {
     try {
       console.log('Fetching horoscope for user:', req.user);
@@ -54,6 +278,7 @@ class HoroscopeController {
       const cachedHoroscope = profile.daily_horoscopes && profile.daily_horoscopes[today];
       
       if (cachedHoroscope) {
+        console.log('Returning cached horoscope');
         return res.status(200).json({
           success: true,
           data: cachedHoroscope,
@@ -61,98 +286,39 @@ class HoroscopeController {
         });
       }
 
-      // Generate new horoscope using AI
-      try {
-        const horoscopeResponse = await llmService.generateDailyHoroscope(zodiacSign, currentDate);
-        
-        // Parse the AI response
-        let horoscopeData;
-        try {
-          horoscopeData = JSON.parse(horoscopeResponse.choices[0].message.content);
-        } catch (parseError) {
-          console.error('Error parsing horoscope JSON:', parseError);
-          // Fallback horoscope if JSON parsing fails
-          horoscopeData = {
-            zodiac_sign: zodiacSign,
-            date: currentDate,
-            overall_theme: "Cosmic Harmony",
-            mood: "Balanced",
-            lucky_number: 7,
-            lucky_color: "Blue",
-            compatibility: {
-              best_with: "Libra",
-              challenging_with: "Aries"
-            },
-            key_areas: {
-              love: "Focus on communication and understanding in relationships.",
-              career: "Good day for creative projects and collaboration.",
-              health: "Maintain balance between work and rest.",
-              finance: "Stable financial day, avoid impulsive purchases."
-            },
-            advice: "Trust your intuition today.",
-            warning: "Avoid major decisions in the evening.",
-            opportunity: "A chance encounter could lead to something meaningful.",
-            energy_level: "Medium",
-            lucky_time: "Afternoon"
-          };
-        }
+      // Generate simple, robust horoscope (no AI dependency)
+      console.log('Generating simple horoscope for:', zodiacSign);
+      const horoscopeData = this.getSimpleHoroscope(zodiacSign, currentDate);
+      
+      // Add date and zodiac sign to the horoscope
+      const completeHoroscope = {
+        zodiac_sign: zodiacSign,
+        date: currentDate,
+        ...horoscopeData
+      };
 
-        // Cache the horoscope in the user's profile
-        if (!profile.daily_horoscopes) {
-          profile.daily_horoscopes = {};
-        }
-        profile.daily_horoscopes[today] = horoscopeData;
-        
-        // Keep only last 7 days of horoscopes to save space
-        const horoscopeKeys = Object.keys(profile.daily_horoscopes);
-        if (horoscopeKeys.length > 7) {
-          const oldestKey = horoscopeKeys[0];
-          delete profile.daily_horoscopes[oldestKey];
-        }
-
-        await profile.save();
-
-        return res.status(200).json({
-          success: true,
-          data: horoscopeData,
-          cached: false
-        });
-
-      } catch (llmError) {
-        console.error('LLM Error generating horoscope:', llmError);
-        
-        // Fallback horoscope if AI fails
-        const fallbackHoroscope = {
-          zodiac_sign: zodiacSign,
-          date: currentDate,
-          overall_theme: "Cosmic Energy",
-          mood: "Neutral",
-          lucky_number: 5,
-          lucky_color: "Green",
-          compatibility: {
-            best_with: "Gemini",
-            challenging_with: "Scorpio"
-          },
-          key_areas: {
-            love: "Be open to new connections.",
-            career: "Focus on completing existing tasks.",
-            health: "Take time for self-care today.",
-            finance: "Review your budget and financial goals."
-          },
-          advice: "Stay positive and focused on your goals.",
-          warning: "Avoid unnecessary conflicts.",
-          opportunity: "Small opportunities may present themselves.",
-          energy_level: "Medium",
-          lucky_time: "Morning"
-        };
-
-        return res.status(200).json({
-          success: true,
-          data: fallbackHoroscope,
-          cached: false,
-          fallback: true
-        });
+      // Cache the horoscope in the user's profile
+      if (!profile.daily_horoscopes) {
+        profile.daily_horoscopes = {};
       }
+      profile.daily_horoscopes[today] = completeHoroscope;
+      
+      // Keep only last 7 days of horoscopes to save space
+      const horoscopeKeys = Object.keys(profile.daily_horoscopes);
+      if (horoscopeKeys.length > 7) {
+        const oldestKey = horoscopeKeys[0];
+        delete profile.daily_horoscopes[oldestKey];
+      }
+
+      await profile.save();
+
+      console.log('Horoscope generated and cached successfully');
+
+      return res.status(200).json({
+        success: true,
+        data: completeHoroscope,
+        cached: false
+      });
 
     } catch (error) {
       console.error('Error in getDailyHoroscope:', error);
