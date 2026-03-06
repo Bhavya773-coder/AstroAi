@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
+import { getProfessionalSymbol } from '../utils/professionalSymbols';
 import toast from 'react-hot-toast';
 
 const OnboardingStep3: React.FC = () => {
@@ -51,7 +52,7 @@ const OnboardingStep3: React.FC = () => {
         localStorage.removeItem('onboarding_context');
 
         // Show success toast
-        toast.success('✨ Your insights are ready! Explore them in the Numerology tab.');
+        toast.success(`${getProfessionalSymbol('✨')} Your insights are ready! Explore them in the Numerology tab.`);
 
         // Redirect to numerology page after a short delay
         setTimeout(() => {
@@ -74,7 +75,7 @@ const OnboardingStep3: React.FC = () => {
         <div className="max-w-md w-full text-center">
           <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-xl p-8 border border-white/20">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-red-500/20 rounded-full mb-4">
-              <span className="text-red-400 text-2xl">⚠️</span>
+              <span className="text-red-400 text-2xl">{getProfessionalSymbol('⚠️')}</span>
             </div>
             <h1 className="text-2xl font-bold text-white mb-4">Generation Failed</h1>
             <p className="text-gray-300 mb-6">{error}</p>
@@ -120,7 +121,7 @@ const OnboardingStep3: React.FC = () => {
                 className="absolute inset-0 border-4 border-yellow-400 rounded-full border-t-transparent animate-spin"
                 style={{ transform: `rotate(${progress * 3.6}deg)` }}
               ></div>
-              <span className="text-yellow-400 text-3xl">🔮</span>
+              <span className="text-yellow-400 text-3xl">{getProfessionalSymbol('🔮')}</span>
             </div>
             
             <h1 className="text-3xl font-bold text-white mb-4">

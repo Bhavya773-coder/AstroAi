@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
+import { getProfessionalSymbol } from '../utils/professionalSymbols';
 import AppNavbar from './AppNavbar';
 
 const MainPage: React.FC = () => {
@@ -221,7 +222,7 @@ const MainPage: React.FC = () => {
                       className="text-purple-300 hover:text-purple-200 transition-colors disabled:opacity-50"
                       title="Refresh horoscope"
                     >
-                      🔄
+                      {getProfessionalSymbol('🔄')}
                     </button>
                   </div>
                 </div>
@@ -234,7 +235,7 @@ const MainPage: React.FC = () => {
                 ) : horoscope ? (
                   <div className="bg-black/30 rounded-xl p-6 mb-4">
                     <div className="text-center mb-4">
-                      <div className="text-4xl mb-3">✨</div>
+                      <div className="text-4xl mb-3">{getProfessionalSymbol('✨')}</div>
                       <h4 className="text-lg font-semibold text-yellow-300 mb-2">
                         {horoscope.overall_theme || 'Cosmic Energy'}
                       </h4>
@@ -246,19 +247,19 @@ const MainPage: React.FC = () => {
                     {/* Key Areas Grid */}
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div className="text-center p-3 bg-white/5 rounded-lg">
-                        <div className="text-pink-300 text-sm mb-1">❤️ Love</div>
+                        <div className="text-pink-300 text-sm mb-1">{getProfessionalSymbol('❤️')} Love</div>
                         <p className="text-white/80 text-xs">{horoscope.key_areas?.love || 'Focus on connections'}</p>
                       </div>
                       <div className="text-center p-3 bg-white/5 rounded-lg">
-                        <div className="text-green-300 text-sm mb-1">💼 Career</div>
+                        <div className="text-green-300 text-sm mb-1">{getProfessionalSymbol('💼')} Career</div>
                         <p className="text-white/80 text-xs">{horoscope.key_areas?.career || 'Professional growth'}</p>
                       </div>
                       <div className="text-center p-3 bg-white/5 rounded-lg">
-                        <div className="text-blue-300 text-sm mb-1">🏥 Health</div>
+                        <div className="text-blue-300 text-sm mb-1">{getProfessionalSymbol('🏥')} Health</div>
                         <p className="text-white/80 text-xs">{horoscope.key_areas?.health || 'Wellness focus'}</p>
                       </div>
                       <div className="text-center p-3 bg-white/5 rounded-lg">
-                        <div className="text-yellow-300 text-sm mb-1">💰 Finance</div>
+                        <div className="text-yellow-300 text-sm mb-1">{getProfessionalSymbol('💰')} Finance</div>
                         <p className="text-white/80 text-xs">{horoscope.key_areas?.finance || 'Financial stability'}</p>
                       </div>
                     </div>
@@ -266,17 +267,17 @@ const MainPage: React.FC = () => {
                     {/* Daily Stats */}
                     <div className="grid grid-cols-3 gap-4 text-center mb-4">
                       <div>
-                        <div className="text-2xl mb-1">🎯</div>
+                        <div className="text-2xl mb-1">{getProfessionalSymbol('🎯')}</div>
                         <div className="text-sm text-white/70">Mood</div>
                         <div className="text-lg font-bold text-purple-400">{horoscope.mood || 'Balanced'}</div>
                       </div>
                       <div>
-                        <div className="text-2xl mb-1">⚡</div>
+                        <div className="text-2xl mb-1">{getProfessionalSymbol('⚡')}</div>
                         <div className="text-sm text-white/70">Energy</div>
                         <div className="text-lg font-bold text-orange-400">{horoscope.energy_level || 'Medium'}</div>
                       </div>
                       <div>
-                        <div className="text-2xl mb-1">🍀</div>
+                        <div className="text-2xl mb-1">{getProfessionalSymbol('🍀')}</div>
                         <div className="text-sm text-white/70">Lucky</div>
                         <div className="text-lg font-bold text-green-400">{horoscope.lucky_number || 7}</div>
                       </div>
@@ -285,13 +286,13 @@ const MainPage: React.FC = () => {
                     {/* Advice */}
                     <div className="text-center p-3 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-lg">
                       <p className="text-white/90 text-sm italic">
-                        💫 {horoscope.advice || 'Trust your intuition today'}
+                        {getProfessionalSymbol('💫')} {horoscope.advice || 'Trust your intuition today'}
                       </p>
                     </div>
                   </div>
                 ) : (
                   <div className="bg-black/30 rounded-xl p-6 text-center">
-                    <div className="text-4xl mb-3">🌙</div>
+                    <div className="text-4xl mb-3">{getProfessionalSymbol('🌙')}</div>
                     <p className="text-white/60">Unable to load horoscope</p>
                     <button 
                       onClick={fetchHoroscope}
@@ -366,10 +367,10 @@ const MainPage: React.FC = () => {
                 className="group bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-400/30 rounded-2xl p-6 backdrop-blur-sm hover:from-green-500/20 hover:to-emerald-500/20 transition-all duration-300 text-left"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-green-400/20 rounded-xl flex items-center justify-center group-hover:bg-green-400/30 transition-colors">
-                    <span className="text-green-300 text-2xl">📊</span>
+                  <div className="w-12 h-12 bg-custom-yellow/15 rounded-lg flex items-center justify-center">
+                    <span className="text-custom-yellow text-xl">{getProfessionalSymbol('☉')}</span>
                   </div>
-                  <span className="text-green-300 text-sm font-medium">New</span>
+                  <span className="text-sm text-custom-yellow font-medium">New</span>
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">Reports</h3>
                 <p className="text-white/70 text-sm">Compatibility analysis</p>
@@ -378,7 +379,7 @@ const MainPage: React.FC = () => {
               <div className="group bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-6 backdrop-blur-sm hover:from-purple-500/20 hover:to-pink-500/20 transition-all duration-300 text-left opacity-75">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-purple-400/20 rounded-xl flex items-center justify-center group-hover:bg-purple-400/30 transition-colors">
-                    <span className="text-purple-300 text-2xl">🔮</span>
+                    <span className="text-purple-300 text-2xl">{getProfessionalSymbol('🔮')}</span>
                   </div>
                   <span className="text-purple-300 text-sm font-medium">Coming</span>
                 </div>
@@ -393,29 +394,36 @@ const MainPage: React.FC = () => {
               <div className="space-y-4">
                 {[
                   { 
-                    icon: '☉', 
+                    icon: getProfessionalSymbol('☉'), 
                     title: 'Birth Chart Analysis', 
                     description: 'Complete astrological profile generated',
                     time: '2 hours ago',
                     color: 'orange'
                   },
                   { 
-                    icon: '🔢', 
+                    icon: getProfessionalSymbol('🔢'), 
                     title: 'Life Path Reading', 
                     description: 'Numerology insights revealed',
                     time: '1 day ago',
-                    color: 'blue'
+                    color: 'violet'
                   },
                   { 
-                    icon: '💑', 
-                    title: 'Compatibility Check', 
-                    description: 'Partner analysis completed',
+                    icon: getProfessionalSymbol('🔮'), 
+                    title: 'Daily Horoscope', 
+                    description: 'Cosmic guidance received',
+                    time: '2 days ago',
+                    color: 'purple'
+                  },
+                  { 
+                    icon: getProfessionalSymbol('📊'), 
+                    title: 'Growth Check-in', 
+                    description: 'Personal progress tracked',
                     time: '3 days ago',
-                    color: 'pink'
+                    color: 'green'
                   }
                 ].map((activity, index) => (
-                  <div key={index} className="flex items-start space-x-4 p-4 bg-black/30 rounded-xl hover:bg-black/40 transition-colors">
-                    <div className={`w-10 h-10 bg-${activity.color}-400/20 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                  <div key={index} className="flex items-center gap-4 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
+                    <div className={`w-10 h-10 bg-${activity.color}-400/20 rounded-lg flex items-center justify-center`}>
                       <span className={`text-${activity.color}-300 text-lg`}>{activity.icon}</span>
                     </div>
                     <div className="flex-1">

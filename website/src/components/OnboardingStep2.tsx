@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { getProfessionalSymbol } from '../utils/professionalSymbols';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
 
@@ -85,7 +86,7 @@ const OnboardingStep2: React.FC = () => {
         <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-xl p-8 border border-white/20">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-400/20 rounded-full mb-4">
-              <span className="text-yellow-400 text-2xl">🌟</span>
+              <span className="text-yellow-400 text-2xl">{getProfessionalSymbol('🌟')}</span>
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">Life Context</h1>
             <p className="text-gray-300">Help us understand your current life situation</p>
