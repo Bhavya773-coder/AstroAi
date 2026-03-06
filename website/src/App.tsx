@@ -17,7 +17,7 @@ import BirthChartPage from './components/BirthChartPage';
 import ReportsPage from './components/ReportsPage';
 import SignUpPage from './components/SignUpPage';
 import ProtectedRoute from './auth/ProtectedRoute';
-import AIChatPage from './components/AIChatPage';
+import GPTChatPage from './components/GPTChatPage';
 
 function App() {
   return (
@@ -87,7 +87,7 @@ function App() {
             path="/ai-chat"
             element={
               <ProtectedRoute>
-                <AIChatPage />
+                <GPTChatPage />
               </ProtectedRoute>
             }
           />

@@ -38,6 +38,9 @@ const AppNavbar: React.FC = () => {
               <NavLink to="/birth-chart" className={linkClassName}>
                 Birth Chart
               </NavLink>
+              <NavLink to="/ai-chat" className={linkClassName}>
+                AI Chat
+              </NavLink>
               <NavLink to="/reports" className={linkClassName}>
                 Reports
               </NavLink>
