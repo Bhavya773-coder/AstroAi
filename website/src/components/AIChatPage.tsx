@@ -207,141 +207,6 @@ const AIChatPage: React.FC = () => {
     }
   }, [inputMessage]);
 
-  const renderEmptyState = () => (
-    <div className="text-center py-12">
-      <div className="text-6xl mb-4 text-blue-400">{getProfessionalSymbol('🤖')}</div>
-      <h3 className="text-xl font-semibold text-white mb-2">Start Your AI Conversation</h3>
-      <p className="text-gray-400 max-w-md mx-auto">
-        I am here to provide guidance on your life journey. Ask me about relationships, career, personal growth, or any spiritual questions you may have.
-      </p>
-    </div>
-  );
-
-  const renderMessages = () => (
-    <div className="space-y-4">
-      {messages.map((message, index) => (
-        <div
-          key={message._id || index.toString()}
-          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-        >
-          <div className={`max-w-2xl mx-2 p-4 rounded-2xl ${
-            message.role === 'user'
-              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-              : 'bg-slate-800/90 border border-slate-700/50 text-white'
-          }`}>
-            {message.role === 'assistant' && (
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-purple-400">{getProfessionalSymbol('🔮')}</span>
-                <span className="text-purple-300 text-sm font-medium">AI Assistant</span>
-                <span className="text-gray-400 text-xs">{formatTime(message.created_at)}</span>
-              </div>
-            )}
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">
-              {message.content}
-            </p>
-            {message.role === 'user' && (
-              <div className="flex items-center justify-end gap-2 mt-2">
-                <span className="text-gray-400 text-xs">{formatTime(message.created_at)}</span>
-              </div>
-            )}
-            {message.ai_analysis_tags && message.ai_analysis_tags.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-slate-700/50">
-                <div className="flex flex-wrap gap-2">
-                  {message.ai_analysis_tags.map((tag, tagIndex) => (
-                    <span
-                      key={tagIndex}
-                      className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
-      {isTyping && (
-        <div className="flex justify-start">
-          <div className="bg-slate-800/90 border border-slate-700/50 text-white max-w-2xl mx-2 p-4 rounded-2xl">
-            <div className="flex items-center gap-2">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-              </div>
-              <span className="text-gray-400 text-sm">AI is thinking...</span>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-    </div>
-  );
-
-  const renderInputArea = () => (
-    <div className="border-t border-slate-700/30 p-4">
-      <div className="flex gap-3">
-        <div className="flex-1 relative">
-          <textarea
-            ref={inputRef}
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask me about your life, career, relationships..."
-            className="w-full bg-slate-800/50 border border-slate-700/50 text-white px-4 py-3 rounded-xl resize-none focus:outline-none focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
-            rows={1}
-            disabled={isLoading}
-          />
-          <div className="absolute bottom-3 right-3 text-gray-400 text-xs">
-            {inputMessage.length}/2000
-          </div>
-        </div>
-        <button
-          onClick={sendMessage}
-          disabled={!inputMessage.trim() || isLoading}
-          className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-500 disabled:to-gray-600 text-white p-3 rounded-xl transition-all duration-200 flex items-center justify-center disabled:opacity-50"
-        >
-          {isLoading ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          ) : (
-            <span className="text-lg">{getProfessionalSymbol('📤')}</span>
-          )}
-        </button>
-      </div>
-    </div>
-  );
-
-  const renderNewConversationModal = () => (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6 max-w-md w-full mx-4">
-        <h3 className="text-xl font-bold text-white mb-4">New Conversation</h3>
-        <input
-          type="text"
-          value={conversationTitle}
-          onChange={(e) => setConversationTitle(e.target.value)}
-          placeholder="Enter conversation title (optional)"
-          className="w-full bg-slate-700/50 border border-slate-600/50 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
-          autoFocus
-        />
-        <div className="flex gap-3 mt-4">
-          <button
-            onClick={() => setShowNewConversationModal(false)}
-            className="flex-1 bg-slate-700/50 hover:bg-slate-600/50 text-white py-2 px-4 rounded-lg transition-colors duration-200"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={createNewConversation}
-            disabled={!conversationTitle.trim()}
-            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-500 disabled:to-gray-600 text-white py-2 px-4 rounded-lg transition-all duration-200 disabled:opacity-50"
-          >
-            Create
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950">
       <div className="absolute inset-0 opacity-20 pointer-events-none">
@@ -459,14 +324,139 @@ const AIChatPage: React.FC = () => {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4">
-            {messages.length === 0 && !isLoading ? renderEmptyState() : renderMessages()}
+            {messages.length === 0 && !isLoading ? (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4 text-blue-400">{getProfessionalSymbol('🤖')}</div>
+                <h3 className="text-xl font-semibold text-white mb-2">Start Your AI Conversation</h3>
+                <p className="text-gray-400 max-w-md mx-auto">
+                  I am here to provide guidance on your life journey. Ask me about relationships, career, personal growth, or any spiritual questions you may have.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {messages.map((message, index) => (
+                  <div
+                    key={message._id || index.toString()}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`max-w-2xl mx-2 p-4 rounded-2xl ${
+                      message.role === 'user'
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                        : 'bg-slate-800/90 border border-slate-700/50 text-white'
+                    }`}>
+                      {message.role === 'assistant' && (
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-purple-400">{getProfessionalSymbol('🔮')}</span>
+                          <span className="text-purple-300 text-sm font-medium">AI Assistant</span>
+                          <span className="text-gray-400 text-xs">{formatTime(message.created_at)}</span>
+                        </div>
+                      )}
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                        {message.content}
+                      </p>
+                      {message.role === 'user' && (
+                        <div className="flex items-center justify-end gap-2 mt-2">
+                          <span className="text-gray-400 text-xs">{formatTime(message.created_at)}</span>
+                        </div>
+                      )}
+                      {message.ai_analysis_tags && message.ai_analysis_tags.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-slate-700/50">
+                          <div className="flex flex-wrap gap-2">
+                            {message.ai_analysis_tags.map((tag, tagIndex) => (
+                              <span
+                                key={tagIndex}
+                                className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="bg-slate-800/90 border border-slate-700/50 text-white max-w-2xl mx-2 p-4 rounded-2xl">
+                      <div className="flex items-center gap-2">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        </div>
+                        <span className="text-gray-400 text-sm">AI is thinking...</span>
+                      </div>
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+            )}
           </div>
 
-          {renderInputArea()}
+          <div className="border-t border-slate-700/30 p-4">
+            <div className="flex gap-3">
+              <div className="flex-1 relative">
+                <textarea
+                  ref={inputRef}
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Ask me about your life, career, relationships..."
+                  className="w-full bg-slate-800/50 border border-slate-700/50 text-white px-4 py-3 rounded-xl resize-none focus:outline-none focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
+                  rows={1}
+                  disabled={isLoading}
+                />
+                <div className="absolute bottom-3 right-3 text-gray-400 text-xs">
+                  {inputMessage.length}/2000
+                </div>
+              </div>
+              <button
+                onClick={sendMessage}
+                disabled={!inputMessage.trim() || isLoading}
+                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-500 disabled:to-gray-600 text-white p-3 rounded-xl transition-all duration-200 flex items-center justify-center disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <span className="text-lg">{getProfessionalSymbol('📤')}</span>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {showNewConversationModal && renderNewConversationModal()}
+        {showNewConversationModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6 max-w-md w-full mx-4">
+              <h3 className="text-xl font-bold text-white mb-4">New Conversation</h3>
+              <input
+                type="text"
+                value={conversationTitle}
+                onChange={(e) => setConversationTitle(e.target.value)}
+                placeholder="Enter conversation title (optional)"
+                className="w-full bg-slate-700/50 border border-slate-600/50 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
+                autoFocus
+              />
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={() => setShowNewConversationModal(false)}
+                  className="flex-1 bg-slate-700/50 hover:bg-slate-600/50 text-white py-2 px-4 rounded-lg transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={createNewConversation}
+                  disabled={!conversationTitle.trim()}
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-500 disabled:to-gray-600 text-white py-2 px-4 rounded-lg transition-all duration-200 disabled:opacity-50"
+                >
+                  Create
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
