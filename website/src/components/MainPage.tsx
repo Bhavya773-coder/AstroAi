@@ -9,6 +9,8 @@ const MainPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
   const [userData, setUserData] = useState<any>(null);
+  const [horoscope, setHoroscope] = useState<any>(null);
+  const [horoscopeLoading, setHoroscopeLoading] = useState(false);
 
   useEffect(() => {
     const checkInsightStatus = async () => {
@@ -57,6 +59,30 @@ const MainPage: React.FC = () => {
   const handleGettingStarted = () => {
     navigate('/onboarding/step-1');
   };
+
+  const fetchHoroscope = async () => {
+    if (horoscopeLoading) return;
+    
+    setHoroscopeLoading(true);
+    try {
+      const response = await apiFetch('/api/horoscope/daily');
+      console.log('Horoscope response:', response);
+      
+      if (response && response.success) {
+        setHoroscope(response.data);
+      }
+    } catch (error: any) {
+      console.error('Error fetching horoscope:', error);
+    } finally {
+      setHoroscopeLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (insightsGenerated && !apiError) {
+      fetchHoroscope();
+    }
+  }, [insightsGenerated, apiError, fetchHoroscope]);
 
   const getCurrentDate = () => {
     const options: Intl.DateTimeFormatOptions = { 
@@ -164,39 +190,100 @@ const MainPage: React.FC = () => {
           <>
             {/* Featured Insights */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              {/* Daily Cosmic Insight */}
+              {/* Daily Horoscope */}
               <div className="lg:col-span-2 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-400/30 rounded-2xl p-6 backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-white">Daily Cosmic Insight</h3>
-                  <span className="text-purple-300 text-sm">Today</span>
-                </div>
-                <div className="bg-black/30 rounded-xl p-6 mb-4">
-                  <div className="text-center">
-                    <div className="text-4xl mb-3">☉</div>
-                    <h4 className="text-lg font-semibold text-yellow-300 mb-2">Solar Energy High</h4>
-                    <p className="text-white/80 text-sm">
-                      Today's cosmic alignment favors leadership and creative expression. 
-                      Your natural charisma is amplified, making it perfect for important conversations.
-                    </p>
+                  <h3 className="text-xl font-bold text-white">Your Daily Horoscope</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-purple-300 text-sm">
+                      {horoscope?.zodiac_sign || 'Loading...'}
+                    </span>
+                    <button 
+                      onClick={fetchHoroscope}
+                      disabled={horoscopeLoading}
+                      className="text-purple-300 hover:text-purple-200 transition-colors disabled:opacity-50"
+                      title="Refresh horoscope"
+                    >
+                      🔄
+                    </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <div className="text-2xl mb-1">🔥</div>
-                    <div className="text-sm text-white/70">Energy</div>
-                    <div className="text-lg font-bold text-orange-400">High</div>
+                
+                {horoscopeLoading ? (
+                  <div className="bg-black/30 rounded-xl p-6 text-center">
+                    <div className="w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-white/60">Generating your cosmic insights...</p>
                   </div>
-                  <div>
-                    <div className="text-2xl mb-1">💫</div>
-                    <div className="text-sm text-white/70">Focus</div>
-                    <div className="text-lg font-bold text-blue-400">Sharp</div>
+                ) : horoscope ? (
+                  <div className="bg-black/30 rounded-xl p-6 mb-4">
+                    <div className="text-center mb-4">
+                      <div className="text-4xl mb-3">✨</div>
+                      <h4 className="text-lg font-semibold text-yellow-300 mb-2">
+                        {horoscope.overall_theme || 'Cosmic Energy'}
+                      </h4>
+                      <p className="text-white/80 text-sm mb-4">
+                        {horoscope.date || getCurrentDate()}
+                      </p>
+                    </div>
+                    
+                    {/* Key Areas Grid */}
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="text-center p-3 bg-white/5 rounded-lg">
+                        <div className="text-pink-300 text-sm mb-1">❤️ Love</div>
+                        <p className="text-white/80 text-xs">{horoscope.key_areas?.love || 'Focus on connections'}</p>
+                      </div>
+                      <div className="text-center p-3 bg-white/5 rounded-lg">
+                        <div className="text-green-300 text-sm mb-1">💼 Career</div>
+                        <p className="text-white/80 text-xs">{horoscope.key_areas?.career || 'Professional growth'}</p>
+                      </div>
+                      <div className="text-center p-3 bg-white/5 rounded-lg">
+                        <div className="text-blue-300 text-sm mb-1">🏥 Health</div>
+                        <p className="text-white/80 text-xs">{horoscope.key_areas?.health || 'Wellness focus'}</p>
+                      </div>
+                      <div className="text-center p-3 bg-white/5 rounded-lg">
+                        <div className="text-yellow-300 text-sm mb-1">💰 Finance</div>
+                        <p className="text-white/80 text-xs">{horoscope.key_areas?.finance || 'Financial stability'}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Daily Stats */}
+                    <div className="grid grid-cols-3 gap-4 text-center mb-4">
+                      <div>
+                        <div className="text-2xl mb-1">🎯</div>
+                        <div className="text-sm text-white/70">Mood</div>
+                        <div className="text-lg font-bold text-purple-400">{horoscope.mood || 'Balanced'}</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl mb-1">⚡</div>
+                        <div className="text-sm text-white/70">Energy</div>
+                        <div className="text-lg font-bold text-orange-400">{horoscope.energy_level || 'Medium'}</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl mb-1">🍀</div>
+                        <div className="text-sm text-white/70">Lucky</div>
+                        <div className="text-lg font-bold text-green-400">{horoscope.lucky_number || 7}</div>
+                      </div>
+                    </div>
+                    
+                    {/* Advice */}
+                    <div className="text-center p-3 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-lg">
+                      <p className="text-white/90 text-sm italic">
+                        💫 {horoscope.advice || 'Trust your intuition today'}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-2xl mb-1">❤️</div>
-                    <div className="text-sm text-white/70">Harmony</div>
-                    <div className="text-lg font-bold text-pink-400">Balanced</div>
+                ) : (
+                  <div className="bg-black/30 rounded-xl p-6 text-center">
+                    <div className="text-4xl mb-3">🌙</div>
+                    <p className="text-white/60">Unable to load horoscope</p>
+                    <button 
+                      onClick={fetchHoroscope}
+                      className="mt-4 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg transition-colors"
+                    >
+                      Try Again
+                    </button>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Quick Stats */}

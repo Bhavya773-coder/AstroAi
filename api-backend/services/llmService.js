@@ -745,6 +745,73 @@ Please provide a comprehensive analysis in JSON format with the following struct
 
 Ensure all interpretations are personalized, insightful, and based on the actual birth data provided.`;
   }
+
+  async generateDailyHoroscope(zodiacSign, currentDate) {
+    try {
+      const prompt = `Generate a daily horoscope for ${zodiacSign} for ${currentDate}. 
+      
+Please provide a comprehensive daily horoscope in JSON format with the following structure:
+{
+  "zodiac_sign": "${zodiacSign}",
+  "date": "${currentDate}",
+  "overall_theme": "Overall theme for the day (2-3 words)",
+  "mood": "Primary emotional energy (1-2 words)",
+  "lucky_number": "A lucky number between 1-9",
+  "lucky_color": "A lucky color",
+  "compatibility": {
+    "best_with": "Zodiac sign most compatible with today",
+    "challenging_with": "Zodiac sign that might be challenging today"
+  },
+  "key_areas": {
+    "love": "Love and relationship guidance for the day",
+    "career": "Career and work guidance for the day", 
+    "health": "Health and wellness guidance for the day",
+    "finance": "Financial guidance for the day"
+  },
+  "advice": "A key piece of advice for the day",
+  "warning": "A gentle warning or caution for the day",
+  "opportunity": "A special opportunity to watch for today",
+  "energy_level": "High/Medium/Low energy level for the day",
+  "lucky_time": "Best time of day for important activities"
+}
+
+Make the horoscope:
+- Personalized and specific to the zodiac sign
+- Practical and actionable
+- Positive and empowering while being realistic
+- Between 200-300 words total across all fields
+- Include specific timing when relevant
+- Focus on today's cosmic influences
+
+Respond with valid JSON only.`;
+
+      const response = await axios.post(this.modelEndpoint, {
+        model: this.modelName,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a professional astrologer specializing in daily horoscopes. Always respond with valid JSON only.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1500
+      }, {
+        timeout: 10000,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Error generating horoscope:', error.message);
+      throw error;
+    }
+  }
 }
 
 module.exports = new LLMService();
