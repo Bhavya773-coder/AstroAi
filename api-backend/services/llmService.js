@@ -772,49 +772,37 @@ Ensure all interpretations are personalized, insightful, and based on the actual
     try {
       const prompt = `Generate a daily horoscope for ${zodiacSign} for ${currentDate}. 
       
-Please provide a comprehensive daily horoscope in JSON format with the following structure:
+Provide only these essential fields in JSON format:
 {
   "zodiac_sign": "${zodiacSign}",
   "date": "${currentDate}",
-  "overall_theme": "Overall theme for the day (2-3 words)",
-  "mood": "Primary emotional energy (1-2 words)",
-  "lucky_number": "A lucky number between 1-9",
-  "lucky_color": "A lucky color",
-  "compatibility": {
-    "best_with": "Zodiac sign most compatible with today",
-    "challenging_with": "Zodiac sign that might be challenging today"
-  },
+  "overall_theme": "2-3 words describing today's cosmic energy",
+  "mood": "1-2 words for emotional state",
+  "energy_level": "High/Medium/Low",
+  "lucky_number": "1-9",
+  "lucky_color": "one color",
   "key_areas": {
-    "love": "Love and relationship guidance for the day",
-    "career": "Career and work guidance for the day", 
-    "health": "Health and wellness guidance for the day",
-    "finance": "Financial guidance for the day"
+    "love": "brief love guidance (15 words max)",
+    "career": "brief career guidance (15 words max)",
+    "health": "brief health guidance (15 words max)",
+    "finance": "brief finance guidance (15 words max)"
   },
-  "advice": "A key piece of advice for the day",
-  "warning": "A gentle warning or caution for the day",
-  "opportunity": "A special opportunity to watch for today",
-  "energy_level": "High/Medium/Low energy level for the day",
-  "lucky_time": "Best time of day for important activities"
+  "advice": "one key advice (20 words max)",
+  "warning": "one gentle warning (15 words max)",
+  "opportunity": "one opportunity (15 words max)",
+  "lucky_time": "best time of day"
 }
 
-Make the horoscope:
-- Personalized and specific to the zodiac sign
-- Practical and actionable
-- Positive and empowering while being realistic
-- Between 200-300 words total across all fields
-- Include specific timing when relevant
-- Focus on today's cosmic influences
-- Make it unique for ${currentDate} - do not repeat previous days
-
+Keep responses very brief and concise. Focus on practical guidance.
 Respond with valid JSON only.`;
 
-      console.log('Calling Ollama for daily horoscope generation...');
+      console.log('Calling Ollama for simplified daily horoscope generation...');
       const response = await axios.post(this.modelEndpoint, {
         model: this.modelName,
         prompt: prompt,
         stream: false
       }, {
-        timeout: 300000, // 5 minutes for comprehensive horoscope
+        timeout: 60000, // 1 minute for simplified horoscope
         headers: {
           'Content-Type': 'application/json'
         }
@@ -826,7 +814,7 @@ Respond with valid JSON only.`;
         // Parse the JSON response from Ollama
         try {
           const horoscopeData = JSON.parse(response.data.response);
-          console.log('Successfully parsed AI horoscope for', zodiacSign);
+          console.log('Successfully parsed simplified AI horoscope for', zodiacSign);
           return horoscopeData;
         } catch (parseError) {
           console.error('Failed to parse AI horoscope response:', parseError);
