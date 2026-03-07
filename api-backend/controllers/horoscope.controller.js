@@ -1,12 +1,21 @@
 const llmService = require('../services/llmService');
+const DailyHoroscopeService = require('../services/dailyHoroscopeService');
 const Profile = require('../models/Profile');
 
 // Global request cache for rate limiting
 const requestCache = new Map();
 
 class HoroscopeController {
+  constructor() {
+    this.dailyHoroscopeService = new DailyHoroscopeService();
+    this.getDailyHoroscope = this.getDailyHoroscope.bind(this);
+    this.refreshDailyHoroscope = this.refreshDailyHoroscope.bind(this);
+    this.getHoroscopeHistory = this.getHoroscopeHistory.bind(this);
+    this.getPublicDailyHoroscope = this.getPublicDailyHoroscope.bind(this);
+  }
+
   // Simple, robust horoscope data that doesn't require AI
-  static getSimpleHoroscope(zodiacSign, currentDate) {
+  getSimpleHoroscope(zodiacSign, currentDate) {
     const horoscopes = {
       'Aries': {
         overall_theme: 'Dynamic Energy',
@@ -183,7 +192,7 @@ class HoroscopeController {
           finance: 'Long-term planning pays dividends.'
         },
         advice: 'Your ambition inspires respect.',
-        warning: 'Don\' neglect relationships for work.',
+        warning: 'Don\'t neglect relationships for work.',
         opportunity: 'A leadership position opens up.',
         energy_level: 'Medium',
         lucky_time: 'Afternoon'
@@ -229,18 +238,50 @@ class HoroscopeController {
     return horoscopes[zodiacSign] || horoscopes['Aries']; // Default to Aries if sign not found
   }
 
+  // Normalize horoscope data to the shape the frontend expects (overall_theme, key_areas, etc.)
+  normalizeHoroscopeForFrontend(horoscope, zodiacSign, currentDate) {
+    if (!horoscope) return null;
+    const date = currentDate || new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const sign = zodiacSign || horoscope.zodiac_sign || 'Aries';
+    // Already in frontend shape (from getSimpleHoroscope)
+    if (horoscope.overall_theme && horoscope.key_areas && typeof horoscope.key_areas === 'object') {
+      return { ...horoscope, date: horoscope.date || date, zodiac_sign: horoscope.zodiac_sign || sign };
+    }
+    // LLM/service shape: overall, love, career, health, lucky_numbers[], etc.
+    return {
+      overall_theme: horoscope.overall_theme || horoscope.overall || 'Cosmic Energy',
+      date: horoscope.date || date,
+      zodiac_sign: horoscope.zodiac_sign || sign,
+      key_areas: {
+        love: horoscope.key_areas?.love ?? horoscope.love ?? 'Focus on connections today.',
+        career: horoscope.key_areas?.career ?? horoscope.career ?? 'Professional growth awaits.',
+        health: horoscope.key_areas?.health ?? horoscope.health ?? 'Wellness focus recommended.',
+        finance: horoscope.key_areas?.finance ?? horoscope.finance ?? 'Financial stability in focus.'
+      },
+      mood: horoscope.mood || 'Balanced',
+      energy_level: horoscope.energy_level || 'Medium',
+      lucky_number: typeof horoscope.lucky_number === 'number' ? horoscope.lucky_number : (Array.isArray(horoscope.lucky_numbers) && horoscope.lucky_numbers[0]) || 7,
+      advice: horoscope.advice || 'Trust your intuition today.',
+      warning: horoscope.warning || null
+    };
+  }
+
+  getZodiacSignFromProfile(profile) {
+    if (!profile) return null;
+    const sign = profile.birth_chart_data?.sun_sign || profile.birth_chart_data?.enhanced_birth_chart_data?.sun_sign?.sign;
+    if (sign) return sign;
+    if (profile.date_of_birth) return this.dailyHoroscopeService.getZodiacSign(profile.date_of_birth);
+    return null;
+  }
+
   async getDailyHoroscope(req, res) {
     try {
       const userId = req.user.userId;
-      
-      console.log('Fetching horoscope for user:', req.user);
-      console.log('User ID:', userId);
-      
-      // Get user's profile to find their zodiac sign
+      const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      console.log('Fetching daily horoscope for user:', userId);
+
       const profile = await Profile.findOne({ user_id: userId });
-      
-      console.log('Found profile:', profile ? 'Yes' : 'No');
-      
       if (!profile) {
         return res.status(404).json({
           success: false,
@@ -248,108 +289,30 @@ class HoroscopeController {
         });
       }
 
-      if (!profile.birth_chart_data) {
-        return res.status(404).json({
-          success: false,
-          message: 'Birth chart data not found. Please complete your profile first.'
-        });
+      const zodiacSign = this.getZodiacSignFromProfile(profile) || 'Aries';
+
+      // 1) Try cached horoscope from DB
+      let horoscope = await this.dailyHoroscopeService.getTodayHoroscope(userId);
+      if (horoscope) {
+        const data = this.normalizeHoroscopeForFrontend(horoscope, zodiacSign, currentDate);
+        return res.status(200).json({ success: true, data, cached: true });
       }
 
-      console.log('Birth chart data:', profile.birth_chart_data);
-
-      // Extract zodiac sign from birth chart data
-      const zodiacSign = profile.birth_chart_data.sun_sign || 
-                          profile.birth_chart_data.enhanced_birth_chart_data?.sun_sign?.sign;
-
-      console.log('Extracted zodiac sign:', zodiacSign);
-
-      if (!zodiacSign) {
-        return res.status(404).json({
-          success: false,
-          message: 'Zodiac sign not found in birth chart data.'
-        });
-      }
-
-      // Get current date
-      const currentDate = new Date().toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-
-      // Check if we already have a horoscope for today (cache for performance)
-      const today = new Date().toDateString();
-      console.log('Today date string:', today);
-      console.log('Profile daily_horoscopes:', profile.daily_horoscopes);
-      
-      const cachedHoroscope = profile.daily_horoscopes && profile.daily_horoscopes[today];
-      console.log('Cached horoscope found:', cachedHoroscope ? 'Yes' : 'No');
-      
-      if (cachedHoroscope) {
-        console.log('Returning cached horoscope for:', cachedHoroscope.zodiac_sign);
-        return res.status(200).json({
-          success: true,
-          data: cachedHoroscope,
-          cached: true
-        });
-      }
-
-      // Generate AI-powered horoscope
-      console.log('Generating AI horoscope for:', zodiacSign);
-      let horoscopeData;
-      
+      // 2) Generate new horoscope (or fallback to simple)
       try {
-        // Try to generate AI horoscope first
-        horoscopeData = await llmService.generateDailyHoroscope(zodiacSign, currentDate);
-        console.log('Successfully generated AI horoscope for:', zodiacSign);
-      } catch (aiError) {
-        console.error('AI horoscope generation failed, falling back to simple horoscope:', aiError.message);
-        // Fallback to simple horoscope if AI fails
-        horoscopeData = HoroscopeController.getSimpleHoroscope(zodiacSign, currentDate);
-        console.log('Using fallback simple horoscope for:', zodiacSign);
-      }
-      
-      // Add date and zodiac sign to the horoscope
-      const completeHoroscope = {
-        zodiac_sign: zodiacSign,
-        date: currentDate,
-        ...horoscopeData
-      };
-
-      // Cache the horoscope in the user's profile
-      if (!profile.daily_horoscopes) {
-        profile.daily_horoscopes = {};
-      }
-      profile.daily_horoscopes[today] = completeHoroscope;
-      console.log('Caching horoscope for date:', today);
-      console.log('Updated daily_horoscopes:', profile.daily_horoscopes);
-      
-      // Keep only last 7 days of horoscopes to save space
-      const horoscopeKeys = Object.keys(profile.daily_horoscopes);
-      if (horoscopeKeys.length > 7) {
-        const oldestKey = horoscopeKeys[0];
-        delete profile.daily_horoscopes[oldestKey];
-        console.log('Removed oldest cache entry:', oldestKey);
+        horoscope = await this.dailyHoroscopeService.generateDailyHoroscope(userId, profile);
+      } catch (genErr) {
+        console.error('Daily horoscope generation failed, using simple horoscope:', genErr.message);
+        horoscope = this.getSimpleHoroscope(zodiacSign, currentDate);
       }
 
-      console.log('Saving profile with horoscope cache...');
-      await profile.save();
-      console.log('Profile saved successfully');
-
-      console.log('Horoscope generated and cached successfully');
-
-      return res.status(200).json({
-        success: true,
-        data: completeHoroscope,
-        cached: false
-      });
-
+      const data = this.normalizeHoroscopeForFrontend(horoscope, zodiacSign, currentDate);
+      return res.status(200).json({ success: true, data, cached: false });
     } catch (error) {
       console.error('Error in getDailyHoroscope:', error);
       return res.status(500).json({
         success: false,
-        message: 'Failed to generate daily horoscope.'
+        message: 'Failed to load daily horoscope.'
       });
     }
   }
@@ -417,18 +380,18 @@ class HoroscopeController {
         ...horoscopeData
       };
 
-      // Cache the fresh horoscope
+      // Cache the fresh horoscope on profile (legacy path)
       if (!profile.daily_horoscopes) {
         profile.daily_horoscopes = {};
       }
       profile.daily_horoscopes[today] = completeHoroscope;
-      
       await profile.save();
       console.log('Saved fresh horoscope for:', zodiacSign);
 
+      const data = this.normalizeHoroscopeForFrontend(completeHoroscope, zodiacSign, currentDate);
       return res.status(200).json({
         success: true,
-        data: completeHoroscope,
+        data,
         cached: false,
         refreshed: true
       });
@@ -438,6 +401,68 @@ class HoroscopeController {
       return res.status(500).json({
         success: false,
         message: 'Failed to refresh daily horoscope.'
+      });
+    }
+  }
+
+  async getPublicDailyHoroscope(req, res) {
+    try {
+      const { zodiac_sign } = req.query;
+      
+      if (!zodiac_sign) {
+        return res.status(400).json({
+          success: false,
+          message: 'Zodiac sign is required. Please provide zodiac_sign query parameter.'
+        });
+      }
+
+      // Validate zodiac sign
+      const validSigns = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+      if (!validSigns.includes(zodiac_sign)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid zodiac sign. Please provide a valid zodiac sign.'
+        });
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Create a simple public horoscope using the existing simple horoscope data
+      const currentDate = new Date().toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      const simpleHoroscope = this.getSimpleHoroscope(zodiac_sign, currentDate);
+      
+      const publicHoroscope = {
+        date: today,
+        zodiac_sign: zodiac_sign,
+        overall: simpleHoroscope.overall_theme,
+        love: simpleHoroscope.key_areas.love,
+        career: simpleHoroscope.key_areas.career,
+        health: simpleHoroscope.key_areas.health,
+        lucky_numbers: [simpleHoroscope.lucky_number],
+        lucky_color: simpleHoroscope.lucky_color,
+        mood: simpleHoroscope.mood,
+        compatibility: `Best with ${simpleHoroscope.compatibility.best_with}`,
+        advice: simpleHoroscope.advice
+      };
+
+      return res.status(200).json({
+        success: true,
+        data: publicHoroscope,
+        cached: false,
+        public: true
+      });
+
+    } catch (error) {
+      console.error('Error in getPublicDailyHoroscope:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to generate public daily horoscope.'
       });
     }
   }

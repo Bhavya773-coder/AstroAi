@@ -100,7 +100,26 @@ db.createCollection("reports", {
         report_type: { bsonType: "string" },
         content: { bsonType: "string" },
         summary: { bsonType: "string" },
-        generated_at: { bsonType: "date" }
+        generated_at: { bsonType: "date" },
+        daily_horoscope: {
+          bsonType: "object",
+          properties: {
+            date: { bsonType: "string" },
+            zodiac_sign: { bsonType: "string" },
+            overall: { bsonType: "string" },
+            love: { bsonType: "string" },
+            career: { bsonType: "string" },
+            health: { bsonType: "string" },
+            lucky_numbers: {
+              bsonType: "array",
+              items: { bsonType: "int" }
+            },
+            lucky_color: { bsonType: "string" },
+            mood: { bsonType: "string" },
+            compatibility: { bsonType: "string" },
+            advice: { bsonType: "string" }
+          }
+        }
       }
     }
   }

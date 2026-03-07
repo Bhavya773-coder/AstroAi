@@ -18,6 +18,7 @@ import ReportsPage from './components/ReportsPage';
 import SignUpPage from './components/SignUpPage';
 import ProtectedRoute from './auth/ProtectedRoute';
 import GPTChatPage from './components/GPTChatPage';
+import { AppDataProvider } from './state/AppDataContext';
 
 function App() {
   return (
@@ -46,53 +47,55 @@ function App() {
             },
           }}
         />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/verify-otp" element={<VerifyOtpPage />} />
-          <Route path="/new-password" element={<NewPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
-          <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/onboarding/step-1" element={<OnboardingStep1 />} />
-          <Route path="/onboarding/step-2" element={<OnboardingStep2 />} />
-          <Route path="/onboarding/step-3" element={<OnboardingStep3 />} />
-          <Route path="/dashboard" element={<MainPage />} />
-          <Route
-            path="/numerology"
-            element={
-              <ProtectedRoute>
-                <NumerologyPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/birth-chart"
-            element={
-              <ProtectedRoute>
-                <BirthChartPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/reports"
-            element={
-              <ProtectedRoute>
-                <ReportsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/ai-chat"
-            element={
-              <ProtectedRoute>
-                <GPTChatPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <AppDataProvider>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/verify-otp" element={<VerifyOtpPage />} />
+            <Route path="/new-password" element={<NewPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
+            <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/onboarding/step-1" element={<OnboardingStep1 />} />
+            <Route path="/onboarding/step-2" element={<OnboardingStep2 />} />
+            <Route path="/onboarding/step-3" element={<OnboardingStep3 />} />
+            <Route path="/dashboard" element={<MainPage />} />
+            <Route
+              path="/numerology"
+              element={
+                <ProtectedRoute>
+                  <NumerologyPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/birth-chart"
+              element={
+                <ProtectedRoute>
+                  <BirthChartPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <ReportsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ai-chat"
+              element={
+                <ProtectedRoute>
+                  <GPTChatPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AppDataProvider>
       </div>
     </Router>
   );

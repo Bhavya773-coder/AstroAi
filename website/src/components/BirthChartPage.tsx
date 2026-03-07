@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
 import * as d3 from 'd3';
 import AppNavbar from './AppNavbar';
+import { useAppData } from '../state/AppDataContext';
 
 // Helper functions for zodiac characteristics
 const getSunSignTraits = (sign: string): string => {
@@ -403,13 +404,9 @@ interface ZodiacSign {
 
 const BirthChartPage: React.FC = () => {
   const navigate = useNavigate();
-  const [birthChartData, setBirthChartData] = useState<BirthChartData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { birthChart, isBirthChartLoading, refreshBirthChart } = useAppData();
+  const [birthChartData, setBirthChartData] = useState<BirthChartData | null>(birthChart?.birthChart ?? null);
   const [error, setError] = useState<string | null>(null);
-  const [sunSignInfo, setSunSignInfo] = useState<ZodiacSign | null>(null);
-  const [moonSignInfo, setMoonSignInfo] = useState<ZodiacSign | null>(null);
-  const [ascendantInfo, setAscendantInfo] = useState<ZodiacSign | null>(null);
-  
   // Individual zodiac signs for display
   const [zodiacData, setZodiacData] = useState({
     sunSign: '',
@@ -418,115 +415,31 @@ const BirthChartPage: React.FC = () => {
     dominantPlanet: ''
   });
   
-  const [isLoadingZodiac, setIsLoadingZodiac] = useState(false);
   const svgRef = useRef<SVGSVGElement>(null);
 
+  // Zodiac insights from local data (no API – avoids slow/hanging LLM and endless loading)
+  const getSignInfo = (signName: string): ZodiacSign | null =>
+    zodiacSignsData.find((s) => s.sign === signName) ?? null;
+  const sunSignInfo = getSignInfo(zodiacData.sunSign);
+  const moonSignInfo = getSignInfo(zodiacData.moonSign);
+  const ascendantInfo = getSignInfo(zodiacData.ascendant);
+
   useEffect(() => {
-    const fetchBirthChartData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const response = await apiFetch('/api/birth-chart');
-        
-        if (response.success) {
-          if (response.birthChart) {
-            setBirthChartData(response.birthChart);
-            // Store individual zodiac signs for display
-            setZodiacData({
-              sunSign: response.sunSign || 'Leo',
-              moonSign: response.moonSign || 'Taurus',
-              ascendant: response.ascendant || 'Leo',
-              dominantPlanet: response.dominantPlanet || 'Sun'
-            });
-            // Fetch detailed zodiac information for user's signs
-            await fetchZodiacDetails({
-              sun_sign: response.sunSign,
-              moon_sign: response.moonSign,
-              ascendant: response.ascendant,
-              dominant_planet: response.dominantPlanet
-            });
-          } else if (response.message && response.message.includes('Generate your insights')) {
-            // User needs to generate insights first
-            setBirthChartData(null);
-            setZodiacData({
-              sunSign: '',
-              moonSign: '',
-              ascendant: '',
-              dominantPlanet: ''
-            });
-          } else {
-            // Other case where birth chart is not available
-            setBirthChartData(null);
-            setZodiacData({
-              sunSign: '',
-              moonSign: '',
-              ascendant: '',
-              dominantPlanet: ''
-            });
-          }
-        } else {
-          setError('Failed to load birth chart data');
-        }
-      } catch (err: any) {
-        console.error('Error fetching birth chart data:', err);
-        setError(err.message || 'Failed to load birth chart data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    const fetchZodiacDetails = async (birthChartData: BirthChartData) => {
-      try {
-        setIsLoadingZodiac(true);
-        
-        // Get detailed info for user's Sun sign
-        if (birthChartData.sun_sign) {
-          const sunResponse = await apiFetch('/api/zodiac/sign-info', {
-            method: 'POST',
-            body: JSON.stringify({ userSign: birthChartData.sun_sign })
-          });
-          
-          if (sunResponse.success) {
-            console.log('Sun sign details:', sunResponse.zodiacInfo);
-            setSunSignInfo(sunResponse.zodiacInfo);
-          }
-        }
-
-        // Get detailed info for user's Moon sign
-        if (birthChartData.moon_sign) {
-          const moonResponse = await apiFetch('/api/zodiac/sign-info', {
-            method: 'POST',
-            body: JSON.stringify({ userSign: birthChartData.moon_sign })
-          });
-          
-          if (moonResponse.success) {
-            console.log('Moon sign details:', moonResponse.zodiacInfo);
-            setMoonSignInfo(moonResponse.zodiacInfo);
-          }
-        }
-
-        // Get detailed info for user's Ascendant
-        if (birthChartData.ascendant) {
-          const ascResponse = await apiFetch('/api/zodiac/sign-info', {
-            method: 'POST',
-            body: JSON.stringify({ userSign: birthChartData.ascendant })
-          });
-          
-          if (ascResponse.success) {
-            console.log('Ascendant details:', ascResponse.zodiacInfo);
-            setAscendantInfo(ascResponse.zodiacInfo);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching zodiac details:', error);
-      } finally {
-        setIsLoadingZodiac(false);
-      }
-    };
-
-    fetchBirthChartData();
-  }, []);
+    if (!birthChart?.success) return;
+    setError(null);
+    if (birthChart.birthChart) {
+      setBirthChartData(birthChart.birthChart);
+      setZodiacData({
+        sunSign: birthChart.sunSign || 'Leo',
+        moonSign: birthChart.moonSign || 'Taurus',
+        ascendant: birthChart.ascendant || 'Leo',
+        dominantPlanet: birthChart.dominantPlanet || 'Sun'
+      });
+    } else {
+      setBirthChartData(null);
+      setZodiacData({ sunSign: '', moonSign: '', ascendant: '', dominantPlanet: '' });
+    }
+  }, [birthChart?.success, birthChart?.birthChart, birthChart?.sunSign, birthChart?.moonSign, birthChart?.ascendant, birthChart?.dominantPlanet]);
 
   // Draw professional astrological birth chart
   const drawCosmicWheel = (data: BirthChartData) => {
@@ -851,12 +764,15 @@ const BirthChartPage: React.FC = () => {
     navigate('/onboarding/step-1');
   };
 
-  if (isLoading) {
+  if (isBirthChartLoading && !birthChartData) {
     return (
-      <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading Birth Chart...</p>
+      <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 text-white">
+        <AppNavbar />
+        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <p className="text-white text-lg">Loading Birth Chart...</p>
+          </div>
         </div>
       </div>
     );
@@ -864,17 +780,20 @@ const BirthChartPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 text-white flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-8">
-          <div className="text-red-400 text-6xl mb-6">⚠️</div>
-          <h2 className="text-2xl font-bold text-white mb-4">Birth Chart Error</h2>
-          <p className="text-white/70 mb-6">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 border border-white/20"
-          >
-            Try Again
-          </button>
+      <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 text-white">
+        <AppNavbar />
+        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+          <div className="text-center max-w-md mx-auto p-8">
+            <div className="text-red-400 text-6xl mb-6">⚠️</div>
+            <h2 className="text-2xl font-bold text-white mb-4">Birth Chart Error</h2>
+            <p className="text-white/70 mb-6">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 border border-white/20"
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -1262,19 +1181,9 @@ const BirthChartPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Detailed Zodiac Information */}
+          {/* Detailed Zodiac Information (from local data – no API loading) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {/* Sun Sign Details */}
-            {isLoadingZodiac ? (
-              <div className="lg:col-span-2 xl:col-span-3 bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/10">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
-                  <p className="text-white text-lg">Loading your zodiac insights...</p>
-                </div>
-              </div>
-            ) : (
-              <>
-                {sunSignInfo && (
+            {sunSignInfo && (
                   <div className="bg-gradient-to-br from-orange-500/10 to-yellow-500/10 border border-orange-400/30 rounded-3xl p-6 backdrop-blur-sm hover:from-orange-500/20 hover:to-yellow-500/20 transition-all duration-300">
                     <div className="flex items-center justify-between mb-4">
                       <div className="text-orange-300 text-sm font-medium uppercase tracking-wider">Sun Sign</div>
@@ -1387,8 +1296,6 @@ const BirthChartPage: React.FC = () => {
                     </div>
                   </div>
                 )}
-              </>
-            )}
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ const { asyncHandler } = require('../middleware/asyncHandler');
 // Generate detailed birth chart using GPT-OSS model
 const generateDetailedBirthChart = asyncHandler(async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     
     // Get user profile
     const profile = await Profile.findOne({ user_id: userId });

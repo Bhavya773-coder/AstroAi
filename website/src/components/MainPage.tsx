@@ -1,17 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiFetch } from '../api/client';
 import { getProfessionalSymbol, cleanAdviceText } from '../utils/professionalSymbols';
 import AppNavbar from './AppNavbar';
+import { useAppData } from '../state/AppDataContext';
 
 const MainPage: React.FC = () => {
   const navigate = useNavigate();
-  const [insightsGenerated, setInsightsGenerated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [apiError, setApiError] = useState(false);
-  const [horoscope, setHoroscope] = useState<any>(null);
-  const [horoscopeLoading, setHoroscopeLoading] = useState(false);
-  const [lastRequestTime, setLastRequestTime] = useState<number>(0);
+  const { insightStatus, isInsightLoading, dailyHoroscope, isHoroscopeLoading, refreshHoroscope } = useAppData();
+  const insightsGenerated = Boolean(insightStatus?.insights_generated);
 
   const getCurrentDate = () => {
     return new Date().toLocaleDateString('en-US', { 
@@ -21,91 +17,6 @@ const MainPage: React.FC = () => {
       day: 'numeric' 
     });
   };
-
-  const fetchHoroscope = useCallback(async () => {
-    if (horoscopeLoading) return;
-    
-    // Prevent rapid requests (minimum 5 seconds between requests)
-    const now = Date.now();
-    if (now - lastRequestTime < 5000) {
-      console.log('Preventing rapid request, last was', Math.round((now - lastRequestTime) / 1000), 'seconds ago');
-      return;
-    }
-    
-    setLastRequestTime(now);
-    setHoroscopeLoading(true);
-    
-    try {
-      console.log('Fetching horoscope from API...');
-      const response = await apiFetch('/api/horoscope/daily');
-      console.log('Horoscope response:', response);
-      
-      if (response && response.success) {
-        setHoroscope(response.data);
-        console.log('Horoscope set successfully:', response.data);
-      } else if (response && response.status === 429) {
-        console.log('Rate limited, using existing horoscope if available');
-        // Don't clear existing horoscope on rate limit
-      } else {
-        console.error('Horoscope API response unsuccessful:', response);
-      }
-    } catch (error: any) {
-      console.error('Error fetching horoscope:', error);
-      console.error('Error details:', error?.message || error?.toString());
-      // Don't clear existing horoscope on error
-    } finally {
-      setHoroscopeLoading(false);
-    }
-  }, [horoscopeLoading, lastRequestTime]);
-
-  useEffect(() => {
-    const checkInsightStatus = async () => {
-      try {
-        console.log('Checking insight status...');
-        console.log('Making API call to:', `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001'}/api/profile/insight-status`);
-        
-        const response = await apiFetch('/api/profile/insight-status');
-        console.log('Raw API response:', response);
-        
-        if (!response) {
-          console.log('No response received, defaulting to false');
-          setInsightsGenerated(false);
-          setApiError(true);
-          return;
-        }
-        
-        console.log('Response type:', typeof response);
-        console.log('Response keys:', Object.keys(response));
-        
-        // Handle new API response format
-        if (response.success && response.profile) {
-          console.log('Setting insightsGenerated to:', response.profile.insights_generated);
-          setInsightsGenerated(response.profile.insights_generated || false);
-          setApiError(false);
-        } else {
-          console.log('Invalid response format, defaulting to false');
-          setInsightsGenerated(false);
-          setApiError(true);
-        }
-      } catch (error: any) {
-        console.error('Error checking insight status:', error);
-        console.error('Error details:', error?.message || error?.toString());
-        // Default to false if API fails
-        setInsightsGenerated(false);
-        setApiError(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkInsightStatus();
-  }, []);
-
-  useEffect(() => {
-    if (insightsGenerated && !apiError) {
-      fetchHoroscope();
-    }
-  }, [insightsGenerated, apiError]);
 
   const handleGettingStarted = () => {
     navigate('/onboarding/step-1');
@@ -150,7 +61,7 @@ const MainPage: React.FC = () => {
           </p>
           
           {/* Loading State */}
-          {isLoading && (
+          {isInsightLoading && (
             <div className="flex items-center justify-center space-x-2">
               <div className="w-4 h-4 bg-custom-yellow rounded-full animate-pulse"></div>
               <span className="text-gray-300">Loading your cosmic profile...</span>
@@ -158,9 +69,9 @@ const MainPage: React.FC = () => {
           )}
           
           {/* Conditional Buttons */}
-          {!isLoading && (
+          {!isInsightLoading && (
             <div className="space-y-4">
-              {(!insightsGenerated || apiError) && (
+              {!insightsGenerated && (
                 <button 
                   onClick={handleGettingStarted}
                   className="bg-custom-yellow hover:bg-yellow-400 text-gray-900 font-semibold py-3 px-8 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
@@ -174,7 +85,7 @@ const MainPage: React.FC = () => {
         </div>
 
         {/* Main Dashboard Grid */}
-        {insightsGenerated && !apiError && (
+        {insightsGenerated && (
           <>
             {/* Featured Insights */}
             <div className="flex justify-center mb-8">
@@ -184,11 +95,11 @@ const MainPage: React.FC = () => {
                   <h3 className="text-2xl font-bold text-white mb-2">Your Daily Horoscope</h3>
                   <div className="flex items-center justify-center gap-3">
                     <span className="text-purple-300 text-sm font-medium">
-                      {horoscope?.zodiac_sign || 'Loading...'}
+                      {dailyHoroscope?.zodiac_sign || 'Loading...'}
                     </span>
                     <button 
-                      onClick={fetchHoroscope}
-                      disabled={horoscopeLoading}
+                      onClick={refreshHoroscope}
+                      disabled={isHoroscopeLoading}
                       className="text-yellow-300 hover:text-yellow-200 transition-colors disabled:opacity-50"
                       title="Refresh horoscope"
                     >
@@ -197,24 +108,24 @@ const MainPage: React.FC = () => {
                   </div>
                 </div>
                 
-                {horoscopeLoading ? (
+                {isHoroscopeLoading && !dailyHoroscope ? (
                   <div className="bg-black/30 rounded-xl p-6 text-center">
                     <div className="w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-white/60">Generating your cosmic insights...</p>
                   </div>
-                ) : horoscope ? (
+                ) : dailyHoroscope ? (
                   <div className="bg-gradient-to-br from-indigo-900/50 to-purple-900/50 border border-purple-400/30 rounded-2xl p-8 mb-4 backdrop-blur-sm shadow-xl">
                     <div className="text-center mb-6">
                       <div className="text-5xl mb-4 text-yellow-300">{getProfessionalSymbol('✨')}</div>
                       <h4 className="text-2xl font-bold text-yellow-300 mb-3">
-                        {horoscope.overall_theme || 'Cosmic Energy'}
+                        {dailyHoroscope.overall_theme || 'Cosmic Energy'}
                       </h4>
                       <p className="text-white/80 text-base mb-2">
-                        {horoscope.date || getCurrentDate()}
+                        {dailyHoroscope.date || getCurrentDate()}
                       </p>
                       <div className="flex items-center justify-center gap-2">
                         <span className="text-purple-300 font-medium">Zodiac:</span>
-                        <span className="text-purple-200 font-semibold">{horoscope.zodiac_sign || 'Loading...'}</span>
+                        <span className="text-purple-200 font-semibold">{dailyHoroscope.zodiac_sign || 'Loading...'}</span>
                       </div>
                     </div>
                     
@@ -223,22 +134,22 @@ const MainPage: React.FC = () => {
                       <div className="text-center p-4 bg-gradient-to-br from-pink-500/10 to-rose-500/10 border border-pink-400/30 rounded-xl hover:border-pink-400/50 transition-all duration-300">
                         <div className="text-pink-300 text-lg mb-2">{getProfessionalSymbol('❤️')}</div>
                         <h5 className="text-pink-300 font-semibold text-sm mb-2">Love</h5>
-                        <p className="text-white/90 text-sm leading-relaxed">{horoscope.key_areas?.love || 'Focus on connections'}</p>
+                        <p className="text-white/90 text-sm leading-relaxed">{dailyHoroscope.key_areas?.love || 'Focus on connections'}</p>
                       </div>
                       <div className="text-center p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-400/30 rounded-xl hover:border-green-400/50 transition-all duration-300">
                         <div className="text-green-300 text-lg mb-2">{getProfessionalSymbol('💼')}</div>
                         <h5 className="text-green-300 font-semibold text-sm mb-2">Career</h5>
-                        <p className="text-white/90 text-sm leading-relaxed">{horoscope.key_areas?.career || 'Professional growth'}</p>
+                        <p className="text-white/90 text-sm leading-relaxed">{dailyHoroscope.key_areas?.career || 'Professional growth'}</p>
                       </div>
                       <div className="text-center p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-400/30 rounded-xl hover:border-blue-400/50 transition-all duration-300">
                         <div className="text-blue-300 text-lg mb-2">{getProfessionalSymbol('🏥')}</div>
                         <h5 className="text-blue-300 font-semibold text-sm mb-2">Health</h5>
-                        <p className="text-white/90 text-sm leading-relaxed">{horoscope.key_areas?.health || 'Wellness focus'}</p>
+                        <p className="text-white/90 text-sm leading-relaxed">{dailyHoroscope.key_areas?.health || 'Wellness focus'}</p>
                       </div>
                       <div className="text-center p-4 bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border border-yellow-400/30 rounded-xl hover:border-yellow-400/50 transition-all duration-300">
                         <div className="text-yellow-300 text-lg mb-2">{getProfessionalSymbol('💰')}</div>
                         <h5 className="text-yellow-300 font-semibold text-sm mb-2">Finance</h5>
-                        <p className="text-white/90 text-sm leading-relaxed">{horoscope.key_areas?.finance || 'Financial stability'}</p>
+                        <p className="text-white/90 text-sm leading-relaxed">{dailyHoroscope.key_areas?.finance || 'Financial stability'}</p>
                       </div>
                     </div>
                     
@@ -247,17 +158,17 @@ const MainPage: React.FC = () => {
                       <div className="p-4 bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border border-yellow-400/30 rounded-xl">
                         <div className="text-3xl mb-2 text-yellow-300">{getProfessionalSymbol('🎯')}</div>
                         <div className="text-sm text-white/70 mb-1">Mood</div>
-                        <div className="text-xl font-bold text-purple-400">{horoscope.mood || 'Balanced'}</div>
+                        <div className="text-xl font-bold text-purple-400">{dailyHoroscope.mood || 'Balanced'}</div>
                       </div>
                       <div className="p-4 bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-400/30 rounded-xl">
                         <div className="text-3xl mb-2 text-orange-400">{getProfessionalSymbol('⚡')}</div>
                         <div className="text-sm text-white/70 mb-1">Energy</div>
-                        <div className="text-xl font-bold text-orange-400">{horoscope.energy_level || 'Medium'}</div>
+                        <div className="text-xl font-bold text-orange-400">{dailyHoroscope.energy_level || 'Medium'}</div>
                       </div>
                       <div className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-400/30 rounded-xl">
                         <div className="text-3xl mb-2 text-green-400">{getProfessionalSymbol('🍀')}</div>
                         <div className="text-sm text-white/70 mb-1">Lucky</div>
-                        <div className="text-xl font-bold text-green-400">{horoscope.lucky_number || 7}</div>
+                        <div className="text-xl font-bold text-green-400">{dailyHoroscope.lucky_number || 7}</div>
                       </div>
                     </div>
                     
@@ -268,19 +179,19 @@ const MainPage: React.FC = () => {
                         <h4 className="text-yellow-300 font-semibold text-sm">Daily Guidance</h4>
                       </div>
                       <p className="text-white/95 text-sm leading-relaxed">
-                        {horoscope.advice || 'Trust your intuition today'}
+                        {dailyHoroscope.advice || 'Trust your intuition today'}
                       </p>
                     </div>
 
                     {/* Warning */}
-                    {horoscope.warning && (
+                    {dailyHoroscope.warning && (
                       <div className="text-center p-4 bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-400/30 rounded-xl">
                         <div className="flex items-center justify-center mb-2">
                           <span className="text-red-300 text-2xl mr-2">{getProfessionalSymbol('⚠️')}</span>
                           <h4 className="text-red-300 font-semibold text-sm">Important Warning</h4>
                         </div>
                         <p className="text-white/95 text-sm leading-relaxed">
-                          {horoscope.warning}
+                          {dailyHoroscope.warning}
                         </p>
                       </div>
                     )}
@@ -290,7 +201,7 @@ const MainPage: React.FC = () => {
                     <div className="text-4xl mb-3 text-purple-300">{getProfessionalSymbol('🌙')}</div>
                     <p className="text-white/60">Unable to load horoscope</p>
                     <button 
-                      onClick={fetchHoroscope}
+                      onClick={refreshHoroscope}
                       className="mt-4 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg transition-colors"
                     >
                       Try Again

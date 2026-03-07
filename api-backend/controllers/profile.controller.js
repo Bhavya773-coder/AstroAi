@@ -1,6 +1,26 @@
+const mongoose = require('mongoose');
 const Profile = require('../models/Profile');
 const User = require('../models/User');
+const Report = require('../models/Report');
 const llmService = require('../services/llmService');
+
+const getZodiacProperties = (sign) => {
+  const zodiacData = {
+    'Aries': { element: 'Fire', quality: 'Cardinal', ruler: 'Mars' },
+    'Taurus': { element: 'Earth', quality: 'Fixed', ruler: 'Venus' },
+    'Gemini': { element: 'Air', quality: 'Mutable', ruler: 'Mercury' },
+    'Cancer': { element: 'Water', quality: 'Cardinal', ruler: 'Moon' },
+    'Leo': { element: 'Fire', quality: 'Fixed', ruler: 'Sun' },
+    'Virgo': { element: 'Earth', quality: 'Mutable', ruler: 'Mercury' },
+    'Libra': { element: 'Air', quality: 'Cardinal', ruler: 'Venus' },
+    'Scorpio': { element: 'Water', quality: 'Fixed', ruler: 'Pluto' },
+    'Sagittarius': { element: 'Fire', quality: 'Mutable', ruler: 'Jupiter' },
+    'Capricorn': { element: 'Earth', quality: 'Cardinal', ruler: 'Saturn' },
+    'Aquarius': { element: 'Air', quality: 'Fixed', ruler: 'Uranus' },
+    'Pisces': { element: 'Water', quality: 'Mutable', ruler: 'Neptune' }
+  };
+  return zodiacData[sign] || { element: 'Unknown', quality: 'Unknown', ruler: 'Unknown' };
+};
 
 // Check if user has generated insights
 const getInsightStatus = async (req, res, next) => {
@@ -238,6 +258,38 @@ const generateInsights = async (req, res, next) => {
         updated_at: new Date()
       }
     );
+
+    // Save birth chart to reports collection so Birth Chart page loads instantly
+    const bc = insights.birth_chart_data;
+    const sunSign = bc?.sun_sign || llmService.getSunSign?.(profile.date_of_birth) || 'Leo';
+    const moonSign = bc?.moon_sign || 'Taurus';
+    const ascendant = bc?.ascendant || sunSign;
+    const dominantPlanet = bc?.dominant_planet || getZodiacProperties(sunSign).ruler;
+    const sunProps = getZodiacProperties(sunSign);
+    const moonProps = getZodiacProperties(moonSign);
+    const ascProps = getZodiacProperties(ascendant);
+    const birthChart = {
+      enhanced_birth_chart_data: {
+        sun_sign: { sign: sunSign, ...sunProps, description: `${sunSign} represents your core identity.` },
+        moon_sign: { sign: moonSign, ...moonProps, description: `${moonSign} represents your emotional nature.` },
+        ascendant: { sign: ascendant, ...ascProps, description: `${ascendant} represents how others perceive you.` },
+        dominant_planet: { planet: dominantPlanet, sign: sunSign, element: sunProps.element, description: `${dominantPlanet} influences your personality.` }
+      },
+      detailed_analysis: { personality_overview: 'Your unique cosmic blueprint.', strengths: [], challenges: [], life_purpose: '', career_insights: '', relationship_insights: '', spiritual_path: '', timing_advice: '' },
+      planetary_positions: { sun: { sign: sunSign, degree: 120 }, moon: { sign: moonSign, degree: 60 } },
+      aspects: [],
+      houses: {},
+      elements: {},
+      modalities: {},
+      dominant_patterns: {}
+    };
+    const userObjectId = mongoose.Types.ObjectId.isValid(userId) ? new mongoose.Types.ObjectId(userId) : userId;
+    await Report.findOneAndUpdate(
+      { user_id: userObjectId, report_type: 'birth_chart' },
+      { $set: { content: birthChart, summary: `Birth chart for ${profile.full_name}`, generated_at: new Date(), updated_at: new Date() } },
+      { upsert: true, new: true }
+    );
+    console.log('Birth chart saved to reports for user:', userId);
 
     console.log('Insights generated and saved for user:', userId);
 

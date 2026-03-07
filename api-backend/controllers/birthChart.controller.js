@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Profile = require('../models/Profile');
 const Report = require('../models/Report');
 const llmService = require('../services/llmService');
@@ -65,73 +66,35 @@ const getBirthChart = async (req, res, next) => {
       });
     }
 
-    // Check if we have a cached birth chart report
-    console.log('Checking for cached birth chart report...');
+    // Always prefer cached birth chart from DB when it exists (no regeneration on GET)
+    const userObjectId = mongoose.Types.ObjectId.isValid(userId) ? new mongoose.Types.ObjectId(userId) : userId;
     const cachedReport = await Report.findOne({ 
-      user_id: userId, 
+      user_id: userObjectId, 
       report_type: 'birth_chart' 
     }).sort({ generated_at: -1 });
 
-    if (cachedReport) {
-      console.log('Found cached birth chart report from:', cachedReport.generated_at);
-      
-      // Check if the cached report is recent (within 30 days)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
-      if (cachedReport.generated_at > thirtyDaysAgo) {
-        console.log('Returning cached birth chart (recent)');
-        return res.json({
-          success: true,
-          message: 'Birth chart loaded from cache',
-          birthChart: cachedReport.content,
-          cached: true,
-          sunSign: cachedReport.content.enhanced_birth_chart_data?.sun_sign?.sign || 'Leo',
-          moonSign: cachedReport.content.enhanced_birth_chart_data?.moon_sign?.sign || 'Taurus',
-          ascendant: cachedReport.content.enhanced_birth_chart_data?.ascendant?.sign || 'Leo',
-          dominantPlanet: cachedReport.content.enhanced_birth_chart_data?.dominant_planet?.planet || 'Sun'
-        });
-      } else {
-        console.log('Cached birth chart is old, generating new one...');
-      }
-    } else {
-      console.log('No cached birth chart found, generating new one...');
-    }
-
-    // Generate new birth chart analysis
-    console.log('Generating new birth chart analysis...');
-    let birthChartAnalysis;
-    try {
-      birthChartAnalysis = await llmService.generateDetailedBirthChart({
-        full_name: profile.full_name,
-        date_of_birth: profile.date_of_birth,
-        time_of_birth: profile.time_of_birth,
-        place_of_birth: profile.place_of_birth,
-        gender: profile.gender,
-        life_context: profile.life_context,
-        numerology_data: profile.numerology_data,
-        existing_birth_chart_data: profile.birth_chart_data
+    if (cachedReport && cachedReport.content) {
+      console.log('Returning cached birth chart from DB, generated at:', cachedReport.generated_at);
+      const content = cachedReport.content;
+      return res.json({
+        success: true,
+        message: 'Birth chart loaded from database',
+        birthChart: content,
+        cached: true,
+        sunSign: content.enhanced_birth_chart_data?.sun_sign?.sign || (typeof content.sun_sign === 'string' ? content.sun_sign : 'Leo'),
+        moonSign: content.enhanced_birth_chart_data?.moon_sign?.sign || (typeof content.moon_sign === 'string' ? content.moon_sign : 'Taurus'),
+        ascendant: content.enhanced_birth_chart_data?.ascendant?.sign || (typeof content.ascendant === 'string' ? content.ascendant : 'Leo'),
+        dominantPlanet: content.enhanced_birth_chart_data?.dominant_planet?.planet || (typeof content.dominant_planet === 'string' ? content.dominant_planet : 'Sun')
       });
-    } catch (error) {
-      console.error('LLM Service Error:', error);
-      // Use fallback data if LLM fails
-      try {
-        birthChartAnalysis = llmService.getEnhancedDefaultBirthChart({
-          full_name: profile.full_name,
-          date_of_birth: profile.date_of_birth,
-          time_of_birth: profile.time_of_birth,
-          place_of_birth: profile.place_of_birth,
-          gender: profile.gender,
-          life_context: profile.life_context,
-          numerology_data: profile.numerology_data
-        });
-      } catch (fallbackError) {
-        console.error('Fallback also failed:', fallbackError);
-        birthChartAnalysis = null;
-      }
     }
 
-    // Create comprehensive birth chart data
+    console.log('No cached birth chart found in DB, building from profile (no LLM - fast path)...');
+
+    // Build birth chart from profile.birth_chart_data - no slow LLM call for initial load
+    // Profile already has sun_sign, moon_sign, ascendant, dominant_planet from onboarding
+    const birthChartAnalysis = null;
+
+    // Create comprehensive birth chart data from profile
     const birthChart = {
       enhanced_birth_chart_data: {
         // If we have simple string data, convert it to expected object structure
@@ -237,7 +200,7 @@ const getBirthChart = async (req, res, next) => {
     try {
       console.log('Caching birth chart in reports collection...');
       const report = new Report({
-        user_id: userId,
+        user_id: userObjectId,
         report_type: 'birth_chart',
         content: birthChart,
         summary: `Birth chart for ${profile.full_name} - Sun: ${birthChart.enhanced_birth_chart_data.sun_sign.sign}, Moon: ${birthChart.enhanced_birth_chart_data.moon_sign.sign}, Ascendant: ${birthChart.enhanced_birth_chart_data.ascendant.sign}`,

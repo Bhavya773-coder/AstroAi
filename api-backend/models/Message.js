@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
+  user_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false,
+    index: true
+  },
   conversation_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Conversation',
@@ -29,7 +35,7 @@ const messageSchema = new mongoose.Schema({
   collection: 'messages'
 });
 
-// Index for faster queries
 messageSchema.index({ conversation_id: 1, created_at: 1 });
+messageSchema.index({ user_id: 1, created_at: -1 });
 
 module.exports = mongoose.model('Message', messageSchema);
