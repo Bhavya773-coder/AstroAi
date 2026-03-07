@@ -804,33 +804,41 @@ Make the horoscope:
 - Between 200-300 words total across all fields
 - Include specific timing when relevant
 - Focus on today's cosmic influences
+- Make it unique for ${currentDate} - do not repeat previous days
 
 Respond with valid JSON only.`;
 
+      console.log('Calling Ollama for daily horoscope generation...');
       const response = await axios.post(this.modelEndpoint, {
         model: this.modelName,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a professional astrologer specializing in daily horoscopes. Always respond with valid JSON only.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1500
+        prompt: prompt,
+        stream: false
       }, {
-        timeout: 10000,
+        timeout: 300000, // 5 minutes for comprehensive horoscope
         headers: {
           'Content-Type': 'application/json'
         }
       });
 
-      return response.data;
+      console.log('Ollama Horoscope Response Status:', response.status);
+      
+      if (response.data && response.data.response) {
+        // Parse the JSON response from Ollama
+        try {
+          const horoscopeData = JSON.parse(response.data.response);
+          console.log('Successfully parsed AI horoscope for', zodiacSign);
+          return horoscopeData;
+        } catch (parseError) {
+          console.error('Failed to parse AI horoscope response:', parseError);
+          console.log('Raw response:', response.data.response);
+          throw new Error('Invalid JSON format in AI response');
+        }
+      }
+
+      throw new Error('Invalid response from Ollama for horoscope generation');
+      
     } catch (error) {
-      console.error('Error generating horoscope:', error.message);
+      console.error('Error generating AI horoscope:', error.message);
       throw error;
     }
   }

@@ -295,9 +295,20 @@ class HoroscopeController {
         });
       }
 
-      // Generate simple, robust horoscope (no AI dependency)
-      console.log('Generating simple horoscope for:', zodiacSign);
-      const horoscopeData = HoroscopeController.getSimpleHoroscope(zodiacSign, currentDate);
+      // Generate AI-powered horoscope
+      console.log('Generating AI horoscope for:', zodiacSign);
+      let horoscopeData;
+      
+      try {
+        // Try to generate AI horoscope first
+        horoscopeData = await llmService.generateDailyHoroscope(zodiacSign, currentDate);
+        console.log('Successfully generated AI horoscope for:', zodiacSign);
+      } catch (aiError) {
+        console.error('AI horoscope generation failed, falling back to simple horoscope:', aiError.message);
+        // Fallback to simple horoscope if AI fails
+        horoscopeData = HoroscopeController.getSimpleHoroscope(zodiacSign, currentDate);
+        console.log('Using fallback simple horoscope for:', zodiacSign);
+      }
       
       // Add date and zodiac sign to the horoscope
       const completeHoroscope = {
@@ -339,6 +350,94 @@ class HoroscopeController {
       return res.status(500).json({
         success: false,
         message: 'Failed to generate daily horoscope.'
+      });
+    }
+  }
+
+  async refreshDailyHoroscope(req, res) {
+    try {
+      const userId = req.user.userId;
+      
+      console.log('Refreshing horoscope for user:', req.user);
+      
+      // Get user's profile
+      const profile = await Profile.findOne({ user_id: userId });
+      
+      if (!profile) {
+        return res.status(404).json({
+          success: false,
+          message: 'User profile not found. Please complete your profile first.'
+        });
+      }
+
+      // Extract zodiac sign from birth chart data
+      const zodiacSign = profile.birth_chart_data?.sun_sign || 
+                          profile.birth_chart_data?.enhanced_birth_chart_data?.sun_sign?.sign;
+
+      if (!zodiacSign) {
+        return res.status(404).json({
+          success: false,
+          message: 'Zodiac sign not found in birth chart data.'
+        });
+      }
+
+      // Get current date
+      const currentDate = new Date().toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      // Clear today's cache
+      const today = new Date().toDateString();
+      if (profile.daily_horoscopes && profile.daily_horoscopes[today]) {
+        delete profile.daily_horoscopes[today];
+        console.log('Cleared cached horoscope for today:', today);
+      }
+
+      // Generate fresh AI horoscope
+      let horoscopeData;
+      
+      try {
+        horoscopeData = await llmService.generateDailyHoroscope(zodiacSign, currentDate);
+        console.log('Successfully generated fresh AI horoscope for:', zodiacSign);
+      } catch (aiError) {
+        console.error('AI horoscope generation failed:', aiError.message);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to generate fresh horoscope. AI service unavailable.'
+        });
+      }
+      
+      // Add date and zodiac sign to the horoscope
+      const completeHoroscope = {
+        zodiac_sign: zodiacSign,
+        date: currentDate,
+        ...horoscopeData
+      };
+
+      // Cache the fresh horoscope
+      if (!profile.daily_horoscopes) {
+        profile.daily_horoscopes = {};
+      }
+      profile.daily_horoscopes[today] = completeHoroscope;
+      
+      await profile.save();
+      console.log('Saved fresh horoscope for:', zodiacSign);
+
+      return res.status(200).json({
+        success: true,
+        data: completeHoroscope,
+        cached: false,
+        refreshed: true
+      });
+
+    } catch (error) {
+      console.error('Error in refreshDailyHoroscope:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to refresh daily horoscope.'
       });
     }
   }
